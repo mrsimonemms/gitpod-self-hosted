@@ -8,6 +8,17 @@ resource "hcloud_placement_group" "vm" {
   type = "spread"
 }
 
+resource "random_integer" "label_id" {
+  min = 1000
+  max = 9999
+}
+
+locals {
+  node_label = {
+    load_balancer = "gitpod-${random_integer.label_id.result}"
+  }
+}
+
 # Manager nodes may or may not run Gitpod resources
 module "k3s_manager" {
   source = "./node"
@@ -15,7 +26,7 @@ module "k3s_manager" {
   cloud_init      = file("${path.module}/../../../cloud-init/k3s_manager.yaml")
   firewall        = hcloud_firewall.firewall.id
   instances       = local.deployment[var.size].machines.manager.count
-  load_balancer   = hcloud_load_balancer.load_balancer.id
+  labels          = local.node_label
   location        = var.location
   name            = format(module.common.name_format, local.location, "k3s-manager-%s")
   network_id      = hcloud_network.network.id
@@ -36,7 +47,7 @@ module "k3s_nodes" {
   })
   firewall        = hcloud_firewall.firewall.id
   instances       = local.deployment[var.size].machines.nodes[count.index].count
-  load_balancer   = hcloud_load_balancer.load_balancer.id
+  labels          = local.node_label
   location        = var.location
   name            = format(module.common.name_format, local.location, "k3s-node-${count.index}-%s")
   network_id      = hcloud_network.network.id

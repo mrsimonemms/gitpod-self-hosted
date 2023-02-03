@@ -11,7 +11,10 @@ variable "instances" {
   type    = number
   default = 1
 }
-variable "load_balancer" {}
+variable "labels" {
+  type    = map(string)
+  default = {}
+}
 variable "location" {}
 variable "name" {}
 variable "network_id" {}

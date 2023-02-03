@@ -23,7 +23,6 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [hcloud_load_balancer_target.virtual_machine](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer_target) | resource |
 | [hcloud_server.virtual_machine](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/server) | resource |
 
 ## Inputs
@@ -34,7 +33,7 @@ No modules.
 | <a name="input_cloud_init"></a> [cloud\_init](#input\_cloud\_init) | n/a | `any` | `null` | no |
 | <a name="input_firewall"></a> [firewall](#input\_firewall) | n/a | `any` | n/a | yes |
 | <a name="input_instances"></a> [instances](#input\_instances) | n/a | `number` | `1` | no |
-| <a name="input_load_balancer"></a> [load\_balancer](#input\_load\_balancer) | n/a | `any` | n/a | yes |
+| <a name="input_labels"></a> [labels](#input\_labels) | n/a | `map(string)` | `{}` | no |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `any` | n/a | yes |
 | <a name="input_name"></a> [name](#input\_name) | n/a | `any` | n/a | yes |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | n/a | `any` | n/a | yes |

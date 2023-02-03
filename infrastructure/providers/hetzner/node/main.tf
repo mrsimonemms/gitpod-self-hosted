@@ -35,15 +35,10 @@ resource "hcloud_server" "virtual_machine" {
     var.ssh_key
   ]
 
-  labels = {
-    managed_by = "terraform"
-  }
-}
-
-resource "hcloud_load_balancer_target" "virtual_machine" {
-  count = var.instances
-
-  load_balancer_id = var.load_balancer
-  server_id        = hcloud_server.virtual_machine[count.index].id
-  type             = "server"
+  labels = merge(
+    {
+      managed_by = "terraform"
+    },
+    var.labels
+  )
 }

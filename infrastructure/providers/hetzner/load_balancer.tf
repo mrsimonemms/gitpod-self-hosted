@@ -7,6 +7,22 @@ resource "hcloud_load_balancer" "load_balancer" {
   }
 }
 
+resource "hcloud_load_balancer_network" "network-subnet" {
+  load_balancer_id = hcloud_load_balancer.load_balancer.id
+  network_id       = hcloud_network.network.id
+}
+
+resource "hcloud_load_balancer_target" "servers" {
+  depends_on = [
+    hcloud_load_balancer_network.network-subnet,
+  ]
+
+  type             = "label_selector"
+  load_balancer_id = hcloud_load_balancer.load_balancer.id
+  label_selector   = join(",", [for key, value in local.node_label : "${key}=${value}"])
+  use_private_ip   = true
+}
+
 resource "hcloud_load_balancer_service" "http" {
   load_balancer_id = hcloud_load_balancer.load_balancer.id
   protocol         = "http"

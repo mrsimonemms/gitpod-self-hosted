@@ -51,6 +51,7 @@ runners so you will need to set the `Execution Mode` to `Local`
 | Name | Version |
 |------|---------|
 | <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.36.2 |
+| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | 0.9.1 |
 
 ## Modules
@@ -68,13 +69,16 @@ runners so you will need to set the `Execution Mode` to `Local`
 |------|------|
 | [hcloud_firewall.firewall](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/firewall) | resource |
 | [hcloud_load_balancer.load_balancer](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer) | resource |
+| [hcloud_load_balancer_network.network-subnet](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer_network) | resource |
 | [hcloud_load_balancer_service.http](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer_service) | resource |
 | [hcloud_load_balancer_service.https](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer_service) | resource |
 | [hcloud_load_balancer_service.ssh](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer_service) | resource |
+| [hcloud_load_balancer_target.servers](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/load_balancer_target) | resource |
 | [hcloud_network.network](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/network) | resource |
 | [hcloud_network_subnet.network-subnet](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/network_subnet) | resource |
 | [hcloud_placement_group.vm](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/placement_group) | resource |
 | [hcloud_ssh_key.vm](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/ssh_key) | resource |
+| [random_integer.label_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) | resource |
 | [time_sleep.managers](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [hcloud_location.location](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/location) | data source |
 
