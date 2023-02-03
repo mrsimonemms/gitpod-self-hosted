@@ -2,6 +2,29 @@
 
 Build Gitpod infrastructure in Hetzner
 
+<!-- toc -->
+
+* [Quickstart](#quickstart)
+* [Requirements](#requirements)
+* [Providers](#providers)
+* [Modules](#modules)
+* [Resources](#resources)
+* [Inputs](#inputs)
+* [Outputs](#outputs)
+
+<!-- Regenerate with "pre-commit run -a markdown-toc" -->
+
+<!-- tocstop -->
+
+## Quickstart
+
+> [Setting environment variables in Gitpod](https://www.gitpod.io/docs/configure/projects/environment-variables#user-specific-environment-variables)
+
+1. [Open this repo in Gitpod](https://gitpod.io/from-referrer/)
+2. [Generate a Hetzner API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token) and save this to an environment variable called `HCLOUD_TOKEN`
+3. Save your desired domain name to an environment variable called `TF_VAR_domain_name`
+4. Run `make hetzner-init hetzner-apply`
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
