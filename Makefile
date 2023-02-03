@@ -1,54 +1,38 @@
-INFRA_PROVIDERS_DIR = ./infrastructure/providers
-WORKSPACE ?= default
-WORKSPACE_PREFIX ?= gitpod-sh-
-
-export TF_WORKSPACE = ${WORKSPACE_PREFIX}${WORKSPACE}
+EXAMPLES_DIR = ./examples
 
 hetzner-init:
+# Hetzner uses Terraform Cloud as the backend, so need to specify the workspace name
 	terraform \
-		-chdir=${INFRA_PROVIDERS_DIR}/hetzner \
+		-chdir=${EXAMPLES_DIR}/hetzner \
 		init \
 		-backend-config=organization="${TF_REMOTE_ORG}" \
 		-backend-config=token="${TF_REMOTE_TOKEN}"
 .PHONY: hetzner-init
 
 hetzner-apply:
-	PROVIDER=hetzner $(MAKE) .tf-apply
+	terraform \
+		-chdir=${EXAMPLES_DIR}/hetzner \
+		apply
+
+	PROVIDER=hetzner $(MAKE) save-kubeconfig
 .PHONY: hetzner-apply
 
 hetzner-plan:
-	PROVIDER=hetzner $(MAKE) .tf-plan
+	terraform \
+		-chdir=${EXAMPLES_DIR}/hetzner \
+		plan
 .PHONY: hetzner-plan
 
 hetzner-destroy:
-	PROVIDER=hetzner $(MAKE) .tf-destroy
+	terraform \
+		-chdir=${EXAMPLES_DIR}/hetzner \
+		destroy
 .PHONY: hetzner-destroy
 
 save-kubeconfig:
 	@mkdir -p ${HOME}/.kube
 
-	@cd ./infrastructure/providers/${PROVIDER} && terraform output -json kubeconfig | jq -r > ${HOME}/.kube/config
+	@cd ${EXAMPLES_DIR}/${PROVIDER} && terraform output -json kubeconfig | jq -r > ${HOME}/.kube/config
 
 	@echo "Kubeconfig saved to ${HOME}/.kube/config"
 .PHONY: save-kubeconfig
-
-# Extensible commands
-.tf-apply:
-	terraform \
-		-chdir=${INFRA_PROVIDERS_DIR}/${PROVIDER} \
-		apply
-
-	$(MAKE) save-kubeconfig
-.PHONY: .tf-apply
-
-.tf-plan:
-	terraform \
-		-chdir=${INFRA_PROVIDERS_DIR}/${PROVIDER} \
-		plan
-.PHONY: .tf-plan
-
-.tf-destroy:
-	terraform \
-		-chdir=${INFRA_PROVIDERS_DIR}/${PROVIDER} \
-		destroy
-.PHONY: .tf-destroy

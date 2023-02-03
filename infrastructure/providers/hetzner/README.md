@@ -90,5 +90,5 @@ runners so you will need to set the `Execution Mode` to `Local`
 
 | Name | Description |
 |------|-------------|
-| <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
+| <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | Kubernetes config YAML file |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

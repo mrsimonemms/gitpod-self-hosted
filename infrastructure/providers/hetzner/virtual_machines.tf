@@ -12,7 +12,7 @@ resource "hcloud_placement_group" "vm" {
 module "k3s_manager" {
   source = "./node"
 
-  cloud_init      = file("../../../cloud-init/k3s_manager.yaml")
+  cloud_init      = file("${path.module}/../../../cloud-init/k3s_manager.yaml")
   firewall        = hcloud_firewall.firewall.id
   instances       = local.deployment[var.size].machines.manager.count
   load_balancer   = hcloud_load_balancer.load_balancer.id
@@ -29,7 +29,7 @@ module "k3s_nodes" {
   source = "./node"
   count  = length(local.deployment[var.size].machines.nodes)
 
-  cloud_init = templatefile("../../../cloud-init/k3s_node.yaml", {
+  cloud_init = templatefile("${path.module}/../../../cloud-init/k3s_node.yaml", {
     labels         = local.deployment[var.size].machines.nodes[count.index].labels
     join_token     = module.k3s_setup.k3s_token
     server_address = module.k3s_manager.nodes[0].private_ip
