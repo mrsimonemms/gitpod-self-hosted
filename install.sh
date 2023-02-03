@@ -16,7 +16,8 @@ fi
 
 mkdir -p ./tmp
 
-export GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-main.6378}" # @todo(sje): autodiscover the "latest"
+GITPOD_IMAGE_SOURCE="${GITPOD_IMAGE_SOURCE:-ghcr.io/mrsimonemms/gitpod-self-hosted/installer}"
+GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-latest}"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
 NAMESPACE="gitpod"
 SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
@@ -99,6 +100,21 @@ get_file() {
   fi
 }
 
+installer() {
+  # Check docker is available
+  which docker > /dev/null || (echo "Docker not installed - see https://docs.docker.com/engine/install" && exit 1)
+
+  # Now, run the Installer
+  docker run -it --rm \
+    -v="${HOME}/.kube:${HOME}/.kube" \
+    -v="${HOME}/.kube:/root/.kube" \
+    -v="${PWD}:${PWD}" \
+    -w="${PWD}" \
+    --entrypoint="${ENTRYPOINT:-/app/installer}" \
+    "${GITPOD_IMAGE_SOURCE}:${GITPOD_INSTALLER_VERSION}" \
+    "${@}"
+}
+
 install_gitpod() {
   echo "Installing Gitpod"
 
@@ -124,10 +140,10 @@ install_gitpod() {
     -o yaml | \
     kubectl replace --force -f -
 
-  ./bin/gitpod-installer validate config -c tmp/gitpod.config.yaml
+  installer validate config -c tmp/gitpod.config.yaml
   # Cluster validation allowed to fail as http-certifcates might not be present
-  ./bin/gitpod-installer validate cluster -n "${NAMESPACE}" --kubeconfig="${KUBECONFIG}" -c tmp/gitpod.config.yaml || true
-  ./bin/gitpod-installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > ${chart_dir}/templates/gitpod.yaml
+  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${KUBECONFIG}" -c tmp/gitpod.config.yaml || true
+  installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > ${chart_dir}/templates/gitpod.yaml
 
   # Escape any Golang template variables
   # shellcheck disable=SC2016
@@ -168,14 +184,14 @@ stop_running_workspaces() {
   # Change the namespace on the context as gpctl doesn't have a namespace flag
   kubectl config set-context --current --namespace="${NAMESPACE}"
 
-  for instance in $(ENTRYPOINT=/app/gpctl ./bin/gitpod-installer workspaces list -o json | jq -r 'select(. != null) | .[] | .Instance'); do
+  for instance in $(ENTRYPOINT=/app/gpctl installer workspaces list -o json | jq -r 'select(. != null) | .[] | .Instance'); do
     echo "Shutting down workspace ${instance}"
-    if ENTRYPOINT=/app/gpctl ./bin/gitpod-installer workspaces stop "${instance}"; then
+    if ENTRYPOINT=/app/gpctl installer workspaces stop "${instance}"; then
       echo "Shutdown ${instance} successfully"
     else
       echo "Retrying shutdown ${instance}"
       sleep 10
-      ENTRYPOINT=/app/gpctl ./bin/gitpod-installer workspaces stop "${instance}"
+      ENTRYPOINT=/app/gpctl installer workspaces stop "${instance}"
     fi
   done
 
