@@ -12,3 +12,4 @@ Thumbs.db
 .terraform
 terraform.tfstate*
 kubeconfig
+chart/gitpod/templates/gitpod.yaml

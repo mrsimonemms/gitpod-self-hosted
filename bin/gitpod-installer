@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Save this script to a `gitpod-installer` file, make it
+# executable and save to your $PATH directory. Now you can
+# use this as you would the normal Installer binary.
+#
+# To change the Installer version, apply a `GITPOD_INSTALLER_VERSION`
+# environment variable (or change the default value).
+
+set -euo pipefail
+
+# Check docker is available
+which docker > /dev/null || (echo "Docker not installed - see https://docs.docker.com/engine/install" && exit 1)
+
+# Now, run the Installer
+docker run -it --rm \
+    -v="${HOME}/.kube:${HOME}/.kube" \
+    -v="${PWD}:${PWD}" \
+    -w="${PWD}" \
+    "eu.gcr.io/gitpod-core-dev/build/installer:${GITPOD_INSTALLER_VERSION}" \
+    "${@}"

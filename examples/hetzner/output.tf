@@ -37,6 +37,13 @@ output "domain_name" {
   value       = var.domain_name
 }
 
+output "gitpod_config" {
+  description = "Gitpod config builder"
+  value = yamlencode({
+    domain = var.domain_name
+  })
+}
+
 output "kubeconfig" {
   description = "Kubernetes config YAML file"
   value       = module.hetzner.kubeconfig

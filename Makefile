@@ -1,4 +1,40 @@
 EXAMPLES_DIR = ./examples
+NAMESPACE = gitpod
+GITPOD_INSTALLER_VERSION ?= main.6378
+CHART_DIR = chart/gitpod
+
+build-gitpod:
+	@$(shell mkdir -p ${CHART_DIR}/templates tmp)
+
+	@$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json gitpod_config | jq -r > tmp/generated_config.yaml)
+
+	@yq -P '. *= load("tmp/generated_config.yaml")' kubernetes/gitpod.config.yaml > tmp/gitpod.config.yaml
+	@$(MAKE) installer ARGS="validate config -c tmp/gitpod.config.yaml"
+	@$(MAKE) installer ARGS="validate cluster -n ${NAMESPACE} --kubeconfig='${HOME}/.kube/config' -c tmp/gitpod.config.yaml"
+	@$(MAKE) -s installer ARGS="render -n ${NAMESPACE} -c tmp/gitpod.config.yaml" > ${CHART_DIR}/templates/gitpod.yaml
+
+# Escape any Golang template variables
+	@sed -i -r 's/(.*\{\{.*)/{{`\1`}}/' "${CHART_DIR}/templates/gitpod.yaml"
+
+	@rm -Rf tmp/chart
+	@cp -rf ${CHART_DIR} tmp/chart
+	@yq e -P -i '.appVersion = "${GITPOD_INSTALLER_VERSION}"' tmp/chart/Chart.yaml
+
+	@echo "Installing Gitpod with Helm"
+	@helm upgrade \
+        --atomic \
+        --cleanup-on-fail \
+        --create-namespace \
+        --install \
+        --namespace="${NAMESPACE}" \
+        --reset-values \
+        --timeout "10m" \
+        --wait \
+        gitpod \
+        tmp/chart
+
+	@echo "Gitpod available on https://$(shell yq '.domain' tmp/gitpod.config.yaml)"
+.PHONY: build-gitpod
 
 cert-manager:
 	@echo "Installing cert-manager"
@@ -38,15 +74,19 @@ cert-manager:
 	@yq -P '. *= load("tmp/cert_manager_spec.yaml")' kubernetes/cert-manager.yaml | kubectl apply -f -
 	@echo "ClusterIssuer created"
 
-	@echo "Creating TLS certificate"
+	@$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json domain_name | jq -r > tmp/domain_name)
 
-	@terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json domain_name | jq -r > tmp/domain_name
+	@echo "Creating TLS certificate for $(shell cat tmp/domain_name)"
 
 	@yq e -o json '.spec.dnsNames=["$(shell cat tmp/domain_name)", "*.$(shell cat tmp/domain_name)", "*.ws.$(shell cat tmp/domain_name)"]' \
 		./kubernetes/tls-certificate.yaml | kubectl apply -f -
 
 	@echo "TLS certificate created"
 .PHONY: cert-manager
+
+installer:
+	@GITPOD_INSTALLER_VERSION=${GITPOD_INSTALLER_VERSION} ./bin/gitpod-installer ${ARGS}
+.PHONY: installer
 
 save-kubeconfig:
 	@mkdir -p ${HOME}/.kube
@@ -56,7 +96,7 @@ save-kubeconfig:
 
 	@echo "Kubeconfig saved to ${HOME}/.kube/config"
 
-	kubectl create namespace gitpod || true
+	@kubectl create namespace ${NAMESPACE} || true
 .PHONY: save-kubeconfig
 
 ###
@@ -76,7 +116,7 @@ hetzner-apply:
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		apply
 
-	PROVIDER=hetzner $(MAKE) save-kubeconfig cert-manager
+	PROVIDER=hetzner $(MAKE) save-kubeconfig cert-manager build-gitpod
 .PHONY: hetzner-apply
 
 hetzner-plan:
