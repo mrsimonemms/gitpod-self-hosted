@@ -104,7 +104,7 @@ save-kubeconfig:
 ###
 
 hetzner-init:
-	terraform \
+	@terraform \
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		init \
 		-backend-config=organization="${TF_REMOTE_ORG}" \
@@ -112,7 +112,7 @@ hetzner-init:
 .PHONY: hetzner-init
 
 hetzner-apply:
-	terraform \
+	@terraform \
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		apply
 
@@ -120,13 +120,13 @@ hetzner-apply:
 .PHONY: hetzner-apply
 
 hetzner-plan:
-	terraform \
+	@terraform \
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		plan
 .PHONY: hetzner-plan
 
 hetzner-destroy:
-	terraform \
+	@terraform \
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		destroy
 .PHONY: hetzner-destroy

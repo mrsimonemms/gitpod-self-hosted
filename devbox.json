@@ -1,7 +1,12 @@
 {
   "packages": [
+    "kubernetes-helm-wrapped",
+    "kubectl",
     "pre-commit",
-    "ruby"
+    "ruby",
+    "terraform",
+    "terraform-docs",
+    "yq-go"
   ],
   "shell": {
     "init_hook": [
@@ -9,6 +14,6 @@
     ]
   },
   "nixpkgs": {
-    "commit": "52e3e80afff4b16ccb7c52e9f0f5220552f03d04"
+    "commit": "3954218cf613eba8e0dcefa9abe337d26bc48fd0"
   }
 }
