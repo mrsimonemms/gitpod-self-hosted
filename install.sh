@@ -125,7 +125,8 @@ install_gitpod() {
     kubectl replace --force -f -
 
   ./bin/gitpod-installer validate config -c tmp/gitpod.config.yaml
-  ./bin/gitpod-installer validate cluster -n "${NAMESPACE}" --kubeconfig="${KUBECONFIG}" -c tmp/gitpod.config.yaml
+  # Cluster validation allowed to fail as http-certifcates might not be present
+  ./bin/gitpod-installer validate cluster -n "${NAMESPACE}" --kubeconfig="${KUBECONFIG}" -c tmp/gitpod.config.yaml || true
   ./bin/gitpod-installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > ${chart_dir}/templates/gitpod.yaml
 
   # Escape any Golang template variables
