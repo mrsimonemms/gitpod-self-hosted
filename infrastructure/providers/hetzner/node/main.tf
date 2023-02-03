@@ -15,6 +15,8 @@ resource "hcloud_server" "virtual_machine" {
   server_type = var.server_type
   location    = var.location
 
+  user_data = var.cloud_init
+
   firewall_ids = [
     var.firewall
   ]

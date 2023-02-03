@@ -1,0 +1,29 @@
+#cloud-config
+#
+# Cloud Init configuration script to configure an Ubuntu 22.04
+# virtual machine to be able to run a Gitpod installation. This
+# is designed to work independently of the specific cloud provider,
+# provided that they support The Cloud Init
+#
+# Requirements:
+# - containerd
+# - ShiftFS
+#
+# @link https://cloudinit.readthedocs.io
+
+package_reboot_if_required: true
+package_update: true
+package_upgrade: true
+packages:
+  - containerd
+  - dkms
+  - git
+  - linux-headers-generic
+  - make
+  - runc
+runcmd:
+# Install ShiftFS - 5.16 works with Ubuntu 22.04
+  - [ git, clone, -b, k5.16, "https://github.com/toby63/shiftfs-dkms.git", /shiftfs-k516 ]
+  - [ make, -f, /shiftfs-k516/Makefile.dkms, -C, /shiftfs-k516 ]
+  - [ modinfo, shiftfs ]
+timezone: UTC
