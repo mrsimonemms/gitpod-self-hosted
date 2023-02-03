@@ -8,6 +8,9 @@ terraform {
   }
 }
 
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
 
 resource "cloudflare_record" "gitpod" {
   count = length(module.hetzner.dns_records)

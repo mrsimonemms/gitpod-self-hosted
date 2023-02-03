@@ -11,3 +11,4 @@ Thumbs.db
 .devbox
 .terraform
 terraform.tfstate*
+kubeconfig

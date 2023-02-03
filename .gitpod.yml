@@ -3,7 +3,7 @@ tasks:
     before: |
       curl -sfL gpm.simonemms.com | bash
 
-      gpm install kubectl pre-commit tfenv
+      gpm install helm kubectl pre-commit tfenv yq
 
       mkdir -p $HOME/.kube
 
@@ -26,6 +26,10 @@ tasks:
 
       if [ -n "${HCLOUD_TOKEN}" ]; then
         echo "Initializing Hetzner"
+        if [ -n "${TF_WORKSPACE}" ]; then
+          terraform workspace new ${TF_WORKSPACE}
+        fi
+
         make hetzner-init
 
         gp sync-done hetzner-init
