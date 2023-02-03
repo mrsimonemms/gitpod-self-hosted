@@ -1,0 +1,21 @@
+tasks:
+  - name: Setup
+    before: |
+      curl -sfL gpm.simonemms.com | bash
+
+      gpm install pre-commit
+
+      gp sync-done setup
+
+      pre-commit install --install-hooks -t pre-commit -t commit-msg
+
+      gp sync-done pre-commit
+
+      exit 0
+  - command: |
+      gp sync-await setup
+
+vscode:
+  extensions:
+    - donjayamanne.git-extension-pack
+    - EditorConfig.EditorConfig
