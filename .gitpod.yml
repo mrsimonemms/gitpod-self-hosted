@@ -20,6 +20,18 @@ tasks:
       gp sync-done pre-commit
 
       exit 0
+  - name: Hetzner
+    command: |
+      gp sync-await setup
+
+      if [ -n "${HCLOUD_TOKEN}" ]; then
+        echo "Initializing Hetzner"
+        make hetzner-init
+
+        gp sync-done hetzner-init
+      fi
+
+      exit 0
   - command: |
       gp sync-await setup
 
