@@ -8,7 +8,7 @@ resource "ssh_resource" "install_primary_manager" {
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
     # Install k3s with additional labels
-    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${length(local.additional_managers) > 0 ? "--cluster-init" : ""} ${join(" ", [for k, v in local.primary_manager.labels : "--node-label=${k}=${v}"])} --disable traefik --node-external-ip ${local.primary_manager.node.public_ip} --node-ip ${local.primary_manager.node.private_ip}\" sh -'"
+    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${length(local.additional_managers) > 0 ? "--cluster-init" : ""} ${join(" ", [for k, v in local.primary_manager.labels : "--node-label=${k}=${v}"])} --disable traefik\" sh -'"
   ]
 }
 
@@ -64,6 +64,6 @@ resource "ssh_resource" "install_additional_managers" {
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
     # Install k3s with additional labels
-    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${join(" ", [for k, v in local.additional_managers[count.index].labels : "--node-label=${k}=${v}"])} --disable traefik --node-external-ip ${local.additional_managers[count.index].node.public_ip} --node-ip ${local.additional_managers[count.index].node.private_ip}\" K3S_URL=\"https://${local.primary_manager.node.private_ip}:6443\" K3S_TOKEN=\"${local.k3s_token}\" sh -'"
+    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${join(" ", [for k, v in local.additional_managers[count.index].labels : "--node-label=${k}=${v}"])} --disable traefik\" K3S_URL=\"https://${local.primary_manager.node.private_ip}:6443\" K3S_TOKEN=\"${local.k3s_token}\" sh -'"
   ]
 }
