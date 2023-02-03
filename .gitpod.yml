@@ -3,7 +3,9 @@ tasks:
     before: |
       curl -sfL gpm.simonemms.com | bash
 
-      gpm install pre-commit tfenv
+      gpm install kubectl pre-commit tfenv
+
+      mkdir -p $HOME/.kube
 
       # Install latest terraform
       tfenv install
