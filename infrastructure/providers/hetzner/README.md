@@ -5,6 +5,7 @@ Build Gitpod infrastructure in Hetzner
 <!-- toc -->
 
 * [Quickstart](#quickstart)
+* [Terraform State](#terraform-state)
 * [Requirements](#requirements)
 * [Providers](#providers)
 * [Modules](#modules)
@@ -24,6 +25,19 @@ Build Gitpod infrastructure in Hetzner
 2. [Generate a Hetzner API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token) and save this to an environment variable called `HCLOUD_TOKEN`
 3. Save your desired domain name to an environment variable called `TF_VAR_domain_name`
 4. Run `make hetzner-init hetzner-apply`
+
+## Terraform State
+
+As there is no Terraform remote state for Hetzner and Hetzner doesn't have
+an S3-compatible storage, this provider is configured to use Terraform Cloud.
+
+You need to set a `TF_REMOTE_ORG` envvar with your organisation name
+(eg, `my-org-name`) and a `TF_REMOTE_TOKEN` envvar with your [Terraform Cloud
+API token](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens).
+
+This provider uses local modules which are incompatible with Terraform Cloud
+runners so you will need to set the `Execution Mode` to `Local`
+[[1](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings#execution-mode)]
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements

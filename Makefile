@@ -1,12 +1,15 @@
 INFRA_PROVIDERS_DIR = ./infrastructure/providers
 WORKSPACE ?= default
+WORKSPACE_PREFIX ?= gitpod-sh-
 
-export TF_WORKSPACE = gitpod-${WORKSPACE}
+export TF_WORKSPACE = ${WORKSPACE_PREFIX}${WORKSPACE}
 
 hetzner-init:
 	terraform \
 		-chdir=${INFRA_PROVIDERS_DIR}/hetzner \
-		init
+		init \
+		-backend-config=organization="${TF_REMOTE_ORG}" \
+		-backend-config=token="${TF_REMOTE_TOKEN}"
 .PHONY: hetzner-init
 
 hetzner-apply:

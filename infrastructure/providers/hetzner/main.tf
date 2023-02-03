@@ -5,6 +5,12 @@ terraform {
       version = ">= 1.0.0, < 2.0.0"
     }
   }
+
+  backend "remote" {
+    workspaces {
+      prefix = "gitpod-sh-"
+    }
+  }
 }
 
 module "common" {
