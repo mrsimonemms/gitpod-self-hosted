@@ -18,3 +18,8 @@ variable "size" {
     condition     = contains(["small"], var.size) // @todo(sje): support medium and large
   }
 }
+
+variable "cloudflare_zone_id" {
+  description = "Zone ID to place DNS records in"
+  type        = string
+}

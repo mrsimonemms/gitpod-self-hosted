@@ -1,3 +1,5 @@
+# Configure the Terraform remote state
+# @link https://developer.hashicorp.com/terraform/language/settings/backends/configuration
 terraform {
   # Use backend remote so we can use -backend-config argument when running terraform init
   backend "remote" {
@@ -7,6 +9,7 @@ terraform {
   }
 }
 
+# Configure the infrastructure in Hetzner
 module "hetzner" {
   source = "../../infrastructure/providers/hetzner"
 
