@@ -46,3 +46,4 @@ vscode:
     - ms-vscode.makefile-tools
     - HashiCorp.terraform
     - HashiCorp.HCL
+    - timonwong.shellcheck

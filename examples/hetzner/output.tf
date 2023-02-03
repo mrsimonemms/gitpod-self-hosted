@@ -11,7 +11,7 @@ output "cert_manager" {
       }
     ]
     # ClusterIssuer configuration
-    cluster_issuer = yamlencode({
+    cluster_issuer = jsonencode({
       spec = {
         acme = {
           solvers = [
@@ -39,9 +39,15 @@ output "domain_name" {
 
 output "gitpod_config" {
   description = "Gitpod config builder"
-  value = yamlencode({
+  value = jsonencode({
     domain = var.domain_name
   })
+}
+
+output "gitpod_secrets" {
+  description = "Gitpod config secrets"
+  value       = jsonencode({})
+  sensitive   = true
 }
 
 output "kubeconfig" {
