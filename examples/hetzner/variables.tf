@@ -20,6 +20,18 @@ variable "size" {
   }
 }
 
+variable "ssh_public_key_path" {
+  description = "Path to public key, used for logging in to VM - passphrases are not supported"
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+}
+
+variable "ssh_private_key_path" {
+  description = "Path to private key, used for logging in to VM - passphrases are not supported"
+  type        = string
+  default     = "~/.ssh/id_rsa"
+}
+
 ## Specific to this deployment
 variable "cloudflare_api_token" {
   description = "API token for Cloudflare"

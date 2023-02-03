@@ -1,6 +1,6 @@
 resource "hcloud_ssh_key" "vm" {
   name       = format(module.common.name_format, local.location, "ssh")
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = local.vm_public_key
 }
 
 resource "hcloud_placement_group" "vm" {

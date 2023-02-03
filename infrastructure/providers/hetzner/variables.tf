@@ -18,3 +18,15 @@ variable "size" {
     condition     = contains(["small"], var.size) // @todo(sje): support medium and large
   }
 }
+
+variable "ssh_public_key_path" {
+  description = "Path to public key, used for logging in to VM - passphrases are not supported"
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+}
+
+variable "ssh_private_key_path" {
+  description = "Path to private key, used for logging in to VM - passphrases are not supported"
+  type        = string
+  default     = "~/.ssh/id_rsa"
+}

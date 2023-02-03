@@ -93,7 +93,7 @@ locals {
       port        = "53"
     },
   ]
-  vm_public_key  = file("~/.ssh/id_rsa.pub")
-  vm_private_key = file("~/.ssh/id_rsa")
+  vm_public_key  = file(var.ssh_public_key_path)
+  vm_private_key = file(var.ssh_private_key_path)
   vm_username    = "gitpod"
 }
