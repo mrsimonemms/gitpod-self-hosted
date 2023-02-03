@@ -2,6 +2,7 @@ resource "ssh_resource" "install_primary_manager" {
   host        = local.primary_manager.node.public_ip
   user        = local.primary_manager.node.username
   private_key = local.primary_manager.private_key
+  port        = 2244
 
   commands = [
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
@@ -24,6 +25,7 @@ resource "ssh_resource" "kubeconfig" {
   host        = local.primary_manager.node.public_ip
   user        = local.primary_manager.node.username
   private_key = local.primary_manager.private_key
+  port        = 2244
 
   commands = [
     "sudo sed \"s/127.0.0.1/${local.primary_manager.node.public_ip}/g\" /etc/rancher/k3s/k3s.yaml"
@@ -39,6 +41,7 @@ resource "ssh_resource" "k3s_token" {
   host        = local.primary_manager.node.public_ip
   user        = local.primary_manager.node.username
   private_key = local.primary_manager.private_key
+  port        = 2244
 
   commands = [
     "sudo cat /var/lib/rancher/k3s/server/node-token"
@@ -55,6 +58,7 @@ resource "ssh_resource" "install_additional_managers" {
   host        = local.additional_managers[count.index].node.public_ip
   user        = local.additional_managers[count.index].node.username
   private_key = local.additional_managers[count.index].private_key
+  port        = 2244
 
   commands = [
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail

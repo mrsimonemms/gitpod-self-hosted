@@ -49,16 +49,10 @@ module "k3s_nodes" {
 resource "time_sleep" "managers" {
   depends_on = [
     module.k3s_manager,
+    hcloud_firewall.firewall,
   ]
 
-  create_duration = "30s"
-}
-resource "time_sleep" "nodes" {
-  depends_on = [
-    module.k3s_nodes,
-  ]
-
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 module "k3s_setup" {

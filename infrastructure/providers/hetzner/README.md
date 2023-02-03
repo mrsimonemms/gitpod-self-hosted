@@ -75,7 +75,6 @@ runners so you will need to set the `Execution Mode` to `Local`
 | [hcloud_placement_group.vm](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/placement_group) | resource |
 | [hcloud_ssh_key.vm](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/ssh_key) | resource |
 | [time_sleep.managers](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
-| [time_sleep.nodes](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [hcloud_location.location](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/location) | data source |
 
 ## Inputs

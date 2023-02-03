@@ -40,8 +40,12 @@ locals {
   }
   firewall = [
     {
-      description = "SSH"
+      description = "Gitpod SSH"
       port        = "22"
+    },
+    {
+      description = "SSH"
+      port        = "2244"
     },
     {
       description = "HTTP"
