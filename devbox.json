@@ -1,7 +1,9 @@
 {
   "packages": [
+    "chromium",
     "kubernetes-helm-wrapped",
     "kubectl",
+    "nodejs",
     "pre-commit",
     "ruby",
     "terraform",
@@ -10,6 +12,8 @@
   ],
   "shell": {
     "init_hook": [
+      "if [ -n \"${TF_WORKSPACE}\" ]; then\n terraform workspace new ${TF_WORKSPACE}\n fi",
+      "export PUPPETEER_EXECUTABLE_PATH=$(which chromium)",
       "pre-commit install --install-hooks -t pre-commit -t commit-msg"
     ]
   },

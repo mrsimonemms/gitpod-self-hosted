@@ -14,3 +14,4 @@ terraform.tfstate*
 kubeconfig
 chart/gitpod/templates/gitpod.yaml
 .envrc
+output.json
