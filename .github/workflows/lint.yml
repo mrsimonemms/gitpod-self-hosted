@@ -1,0 +1,50 @@
+name: Lint
+on:
+  - pull_request
+  - push
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # fetch-depth is required
+
+      - uses: wagoid/commitlint-github-action@v5
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ludeeus/action-shellcheck@master
+
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        # Only checks modules, not examples
+        dir:
+          - infrastructure/modules/common
+          - infrastructure/modules/k3s
+          - infrastructure/providers/hetzner
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: hashicorp/setup-terraform@v2
+
+      # Not used, but required for the validation tests
+      - name: Create private key
+        run: |
+          mkdir -p "${HOME}/.ssh"
+          ssh-keygen -t dsa -N "my passphrase" -C "test key" -f "${HOME}/.ssh/id_rsa"
+
+      - name: Terraform fmt
+        run: terraform fmt -recursive -check
+
+      - name: Terraform init
+        run: terraform -chdir=${{ matrix.dir }} init
+
+      - name: Terraform validate
+        run: terraform -chdir=${{ matrix.dir }} validate
