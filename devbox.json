@@ -12,7 +12,7 @@
   ],
   "shell": {
     "init_hook": [
-      "if [ -n \"${TF_WORKSPACE}\" ]; then\n terraform workspace new ${TF_WORKSPACE}\n fi",
+      "if [ -n \"${TF_WORKSPACE}\" ]; then\n terraform workspace new ${TF_WORKSPACE} || true\n fi",
       "export PUPPETEER_EXECUTABLE_PATH=$(which chromium)",
       "pre-commit install --install-hooks -t pre-commit -t commit-msg"
     ]
