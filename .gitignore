@@ -9,3 +9,5 @@ node_modules
 Thumbs.db
 .commit
 .devbox
+.terraform
+terraform.tfstate*

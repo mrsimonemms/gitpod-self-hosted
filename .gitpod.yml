@@ -3,7 +3,13 @@ tasks:
     before: |
       curl -sfL gpm.simonemms.com | bash
 
-      gpm install pre-commit
+      gpm install pre-commit tfenv
+
+      # Install latest terraform
+      tfenv install
+      tfenv use
+
+      go install github.com/terraform-docs/terraform-docs@latest
 
       gp sync-done setup
 
@@ -19,3 +25,6 @@ vscode:
   extensions:
     - donjayamanne.git-extension-pack
     - EditorConfig.EditorConfig
+    - ms-vscode.makefile-tools
+    - HashiCorp.terraform
+    - HashiCorp.HCL
