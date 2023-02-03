@@ -19,6 +19,7 @@ mkdir -p ./tmp
 export GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-main.6378}" # @todo(sje): autodiscover the "latest"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
 NAMESPACE="gitpod"
+SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
 REPO_RAW_URL="${REPO_RAW_URL:-https://raw.githubusercontent.com/MrSimonEmms/gitpod-self-hosted/main}"
 
 # Create the Gitpod namespace
@@ -106,11 +107,22 @@ install_gitpod() {
   gitpod_config="${1}"
   # gitpod_secrets="${2}" # @todo(sje): incorporate secrets into build
 
+  # Generate SSH private key
+  rm -f tmp/ssh-key*
+  ssh-keygen -t rsa -N "" -C "Gitpod SSH key" -f tmp/ssh-key
+
   echo "${gitpod_config}" > tmp/generated_config.yaml
 	yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
 
   mkdir -p ${chart_dir}/templates
   cp "$(get_file chart/gitpod/Chart.yaml)" ${chart_dir}/Chart.yaml
+  kubectl create secret generic \
+    "${SSH_HOST_KEY_SECRET}" \
+    --from-file="host-key=./tmp/ssh-key" \
+    -n "${NAMESPACE}" \
+    --dry-run=client \
+    -o yaml | \
+    kubectl replace --force -f -
 
   ./bin/gitpod-installer validate config -c tmp/gitpod.config.yaml
   ./bin/gitpod-installer validate cluster -n "${NAMESPACE}" --kubeconfig="${KUBECONFIG}" -c tmp/gitpod.config.yaml
