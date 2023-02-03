@@ -11,7 +11,7 @@ resource "hcloud_server" "virtual_machine" {
   count = var.instances
 
   name        = format(var.name, count.index)
-  image       = "ubuntu-22.04"
+  image       = "ubuntu-20.04"
   server_type = var.server_type
   location    = var.location
 

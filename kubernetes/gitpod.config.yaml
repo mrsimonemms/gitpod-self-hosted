@@ -3,4 +3,4 @@ workspace:
   runtime:
     containerdRuntimeDir: /run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io
     containerdSocket: /run/k3s/containerd/containerd.sock
-    fsShiftMethod: fuse # @todo(sje): use shiftfs
+    fsShiftMethod: shiftfs # This is only compatible with Ubuntu 20.04 - Ubuntu 22.04 uses cgroup v1
