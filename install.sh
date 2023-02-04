@@ -48,18 +48,18 @@ cert_manager() {
   cluster_issuer="${3}"
 
   helm upgrade \
-		--atomic \
-		--cleanup-on-fail \
-		--create-namespace \
-		--install \
-		--namespace "${cm_namespace}" \
-		--repo https://charts.jetstack.io \
-		--reset-values \
-		--set installCRDs=true \
-		--set 'extraArgs={--dns01-recursive-nameservers-only=true,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}' \
-		--version ^1.11.0 \
-		--wait \
-		cert-manager cert-manager
+    --atomic \
+    --cleanup-on-fail \
+    --create-namespace \
+    --install \
+    --namespace "${cm_namespace}" \
+    --repo https://charts.jetstack.io \
+    --reset-values \
+    --set installCRDs=true \
+    --set 'extraArgs={--dns01-recursive-nameservers-only=true,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}' \
+    --version ^1.11.0 \
+    --wait \
+    cert-manager cert-manager
 
   echo "Creating secrets for the ClusterIssuer"
 
@@ -83,7 +83,7 @@ cert_manager() {
   echo "Creating TLS certificate for ${domain_name}"
   yq e \
     ".spec.dnsNames=[\"${domain_name}\", \"*.${domain_name}\", \"*.ws.${domain_name}\"]" \
-	  "$(get_file kubernetes/tls-certificate.yaml)" | kubectl apply -f -
+    "$(get_file kubernetes/tls-certificate.yaml)" | kubectl apply -f -
 }
 
 get_file() {
@@ -128,7 +128,7 @@ install_gitpod() {
   ssh-keygen -t rsa -N "" -C "Gitpod SSH key" -f tmp/ssh-key
 
   echo "${gitpod_config}" > tmp/generated_config.yaml
-	yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
+  yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
 
   mkdir -p ${chart_dir}/templates
   cp "$(get_file chart/gitpod/Chart.yaml)" ${chart_dir}/Chart.yaml
@@ -147,7 +147,7 @@ install_gitpod() {
 
   # Escape any Golang template variables
   # shellcheck disable=SC2016
-	sed -i -r 's/(.*\{\{.*)/{{`\1`}}/' "${chart_dir}/templates/gitpod.yaml"
+  sed -i -r 's/(.*\{\{.*)/{{`\1`}}/' "${chart_dir}/templates/gitpod.yaml"
 
   yq e -P -i ".appVersion = \"${GITPOD_INSTALLER_VERSION}\"" "${chart_dir}/Chart.yaml"
 
