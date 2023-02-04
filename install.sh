@@ -105,9 +105,9 @@ installer() {
   which docker > /dev/null || (echo "Docker not installed - see https://docs.docker.com/engine/install" && exit 1)
 
   # Now, run the Installer
-  docker run -it --rm \
-    -v="${HOME}/.kube:${HOME}/.kube" \
-    -v="${HOME}/.kube:/root/.kube" \
+  docker run --rm \
+    -v="${KUBECONFIG}:${HOME}/.kube/config" \
+    -v="${KUBECONFIG}:/root/.kube/config" \
     -v="${PWD}:${PWD}" \
     -w="${PWD}" \
     --entrypoint="${ENTRYPOINT:-/app/installer}" \
