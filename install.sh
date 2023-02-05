@@ -141,8 +141,8 @@ install_gitpod() {
   cp "$(get_file chart/gitpod/Chart.yaml)" ${chart_dir}/Chart.yaml
 
   installer validate config -c tmp/gitpod.config.yaml
-  # Cluster validation allowed to fail as http-certifcates might not be present
-  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${KUBECONFIG}" -c tmp/gitpod.config.yaml || true
+  # Cluster validation allowed to fail as http-certifcates might not be present - kubeconfig is path inside container
+  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml || true
   installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > ${chart_dir}/templates/gitpod.yaml
 
   # Escape any Golang template variables
