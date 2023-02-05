@@ -124,21 +124,21 @@ install_gitpod() {
   # gitpod_secrets="${2}" # @todo(sje): incorporate secrets into build
 
   # Generate SSH private key
-  rm -f tmp/ssh-key*
-  ssh-keygen -t rsa -N "" -C "Gitpod SSH key" -f tmp/ssh-key
+  if ! kubectl get secret -n "${NAMESPACE}" "${SSH_HOST_KEY_SECRET}"; then
+    rm -f tmp/ssh-key*
+    ssh-keygen -t rsa -N "" -C "Gitpod SSH key" -f tmp/ssh-key
+
+    kubectl create secret generic \
+      "${SSH_HOST_KEY_SECRET}" \
+      --from-file="host-key=./tmp/ssh-key" \
+      -n "${NAMESPACE}"
+  fi
 
   echo "${gitpod_config}" > tmp/generated_config.yaml
   yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
 
   mkdir -p ${chart_dir}/templates
   cp "$(get_file chart/gitpod/Chart.yaml)" ${chart_dir}/Chart.yaml
-  kubectl create secret generic \
-    "${SSH_HOST_KEY_SECRET}" \
-    --from-file="host-key=./tmp/ssh-key" \
-    -n "${NAMESPACE}" \
-    --dry-run=client \
-    -o yaml | \
-    kubectl replace --force -f -
 
   installer validate config -c tmp/gitpod.config.yaml
   # Cluster validation allowed to fail as http-certifcates might not be present
