@@ -149,7 +149,7 @@ install_gitpod() {
   # shellcheck disable=SC2016
   sed -i -r 's/(.*\{\{.*)/{{`\1`}}/' "${chart_dir}/templates/gitpod.yaml"
 
-  yq e -P -i ".appVersion = \"${GITPOD_INSTALLER_VERSION}\"" "${chart_dir}/Chart.yaml"
+  yq e -P -i ".appVersion = \"$(installer version | jq -r '.version')\"" "${chart_dir}/Chart.yaml"
 
   stop_running_workspaces
 
