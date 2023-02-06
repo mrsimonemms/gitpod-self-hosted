@@ -42,8 +42,7 @@ tasks:
   - env:
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
     init: |
-      cd ./werft-scraper
-      npm ci
+      (cd ./werft-scraper && npm ci)
     command: |
       gp sync-await setup
 
