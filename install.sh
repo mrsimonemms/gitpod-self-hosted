@@ -63,15 +63,21 @@ cert_manager() {
 
   echo "Creating secrets for the ClusterIssuer"
 
-  for row in $(echo "${secrets}" | jq -r '.[] | @base64'); do
-    secret="$(echo "${row}" | base64 -d)"
+  for secretName in $(echo "${secrets}" | jq -r 'keys[]'); do
+    secretList="$(echo "${secrets}" | jq --arg KEY "${secretName}" '.[$KEY]')"
 
-    kubectl create secret generic "$(echo "${secret}" | jq -r '.name')" \
-      -n "${cm_namespace}" \
-      --from-literal="$(echo "${secret}" | jq -r '.key')=$(echo "${secret}" | jq -r '.value')" \
-      --dry-run=client \
-      -o yaml | \
-      kubectl replace --force -f -
+    keyValuePairs="$(echo "${secretList}" | jq -r 'to_entries | map("\(.key)=\(.value | tostring)") | .[] | @base64')"
+
+    create_cmd="kubectl create secret generic ${secretName}"
+    create_cmd+=" -n ${cm_namespace}"
+    create_cmd+=" --dry-run=client"
+    create_cmd+=" -o yaml"
+
+    for value in $keyValuePairs; do
+      create_cmd+=" --from-literal=\"$(echo "${value}" | base64 -d)\""
+    done
+
+    eval "${create_cmd}" | kubectl replace --force -f -
   done
 
   echo "Creating ClusterIssuer"
