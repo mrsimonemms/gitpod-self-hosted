@@ -110,6 +110,7 @@ installer() {
     -v="${KUBECONFIG}:/root/.kube/config" \
     -v="${PWD}:${PWD}" \
     -w="${PWD}" \
+    --pull=always \
     --entrypoint="${ENTRYPOINT:-/app/installer}" \
     "${GITPOD_IMAGE_SOURCE}:${GITPOD_INSTALLER_VERSION}" \
     "${@}"
