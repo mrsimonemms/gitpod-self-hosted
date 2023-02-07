@@ -3,13 +3,11 @@ output "cert_manager" {
   sensitive   = true
   value = {
     # Secrets required to make Cloudflare work
-    secrets = [
-      {
-        name  = "cloudflare-solver"
-        key   = "apiToken"
-        value = var.cloudflare_api_token
+    secrets = {
+      cloudflare-solver = {
+        apiToken = var.cloudflare_api_token
       }
-    ]
+    }
     # ClusterIssuer configuration
     cluster_issuer = jsonencode({
       spec = {
