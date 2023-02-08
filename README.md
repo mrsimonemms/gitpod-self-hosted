@@ -206,7 +206,8 @@ output "cert_manager" {
 
 #### `domain_name`
 
-Output the `domain_name` that
+Output the `domain_name` that the instance lives behind. This
+is in the format `gitpod.domain.com`.
 
 ```terraform
 output "domain_name" {
