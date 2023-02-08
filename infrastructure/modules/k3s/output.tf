@@ -4,6 +4,6 @@ output "k3s_token" {
 }
 
 output "kubeconfig" {
-  value     = ssh_resource.kubeconfig.result
+  value     = ssh_sensitive_resource.kubeconfig.result
   sensitive = true
 }

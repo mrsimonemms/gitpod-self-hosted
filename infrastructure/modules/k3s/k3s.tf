@@ -13,7 +13,7 @@ resource "ssh_resource" "install_primary_manager" {
 }
 
 // Only run on first manager node
-resource "ssh_resource" "kubeconfig" {
+resource "ssh_sensitive_resource" "kubeconfig" {
   depends_on = [
     ssh_resource.install_primary_manager
   ]
@@ -33,7 +33,7 @@ resource "ssh_resource" "kubeconfig" {
 }
 
 // Only run on first manager node
-resource "ssh_resource" "k3s_token" {
+resource "ssh_sensitive_resource" "k3s_token" {
   depends_on = [
     ssh_resource.install_primary_manager
   ]

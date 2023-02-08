@@ -25,8 +25,8 @@ No modules.
 |------|------|
 | [ssh_resource.install_additional_managers](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/resource) | resource |
 | [ssh_resource.install_primary_manager](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/resource) | resource |
-| [ssh_resource.k3s_token](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/resource) | resource |
-| [ssh_resource.kubeconfig](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/resource) | resource |
+| [ssh_sensitive_resource.k3s_token](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/sensitive_resource) | resource |
+| [ssh_sensitive_resource.kubeconfig](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/sensitive_resource) | resource |
 
 ## Inputs
 
