@@ -131,6 +131,9 @@ This is an optional step, but strongly recommended.
 This installs cert-manager with Helm, creates any secrets and configures the
 ClusterIssuer you've defined in the Terraform output.
 
+**NB** - the `SECRETS` and `CLUSTER_ISSUER` arguments must be encoded
+as [Base64](https://en.wikipedia.org/wiki/Base64).
+
 ```shell
 curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main/install.sh | \
   CMD=cert_manager \
@@ -143,6 +146,9 @@ curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main
 #### Install Gitpod
 
 Installs or upgrades Gitpod.
+
+**NB** - the `GITPOD_CONFIG` and `GITPOD_SECRETS` arguments must be encoded
+as [Base64](https://en.wikipedia.org/wiki/Base64).
 
 ```shell
 curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main/install.sh | \
@@ -168,6 +174,8 @@ The `cert_manager` output must have two keys - `secrets` and
 `cluster_issuer`. The `secrets` are the secrets required for the
 ClusterIssuer to work. Each key is the secret name and the value is
 key/value pairs of the secret name and secret value.
+
+These secrets will be created in the `cert-manager` namespace.
 
 The `cluster_issuer` is the Kubernetes manifest's `spec`. Check the
 [cert-manager](https://cert-manager.io/docs/configuration/acme/dns01/#supported-dns01-providers)
@@ -245,9 +253,34 @@ output "gitpod_config" {
 
 #### `gitpod_secrets`
 
-This is currently a `todo`, but will be where secrets for database, registry,
-storage etc are defined. It will be key/value pairs similar to the `cert_manager
-secrets.
+These will be secrets that are required by the [`gitpod_config`](#gitpod_config).
+Typically, these will be credentials for your database, registry, storage and
+the like.
+
+These secrets will be created in the `gitpod` namespace.
+
+Like the [`cert_manager`](#cert_manager) output, these will have the secret
+name as the top-level key and then any secrets as key/value pairs.
+
+This example is how one might define the `database` secret for an Azure
+MySQL database - this is based upon [an old project](https://github.com/mrsimonemms/gitpod-self-hosted-infrastructure/blob/main/infrastructure/azure/output.tf#L24)
+as Azure is not yet supported by this project.
+
+```terraform
+output "gitpod_secrets" {
+  value = {
+    database = {
+      # If unsure, use this key
+      encryptionKeys = "[{\"name\":\"general\",\"version\":1,\"primary\":true,\"material\":\"4uGh1q8y2DYryJwrVMHs0kWXJlqvHWWt/KJuNi04edI=\"}]"
+      host           = "${azurerm_mysql_server.db.0.name}.mysql.database.azure.com"
+      password       = azurerm_mysql_server.db.0.administrator_login_password
+      port           = 3306
+      username       = "${azurerm_mysql_server.db.0.administrator_login}@${azurerm_mysql_server.db.0.name}"
+    }
+  }
+  sensitive = true
+}
+```
 
 #### `kubeconfig`
 

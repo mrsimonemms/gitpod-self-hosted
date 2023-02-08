@@ -63,22 +63,7 @@ cert_manager() {
 
   echo "Creating secrets for the ClusterIssuer"
 
-  for secretName in $(echo "${secrets}" | jq -r 'keys[]'); do
-    secretList="$(echo "${secrets}" | jq --arg KEY "${secretName}" '.[$KEY]')"
-
-    keyValuePairs="$(echo "${secretList}" | jq -r 'to_entries | map("\(.key)=\(.value | tostring)") | .[] | @base64')"
-
-    create_cmd="kubectl create secret generic ${secretName}"
-    create_cmd+=" -n ${cm_namespace}"
-    create_cmd+=" --dry-run=client"
-    create_cmd+=" -o yaml"
-
-    for value in $keyValuePairs; do
-      create_cmd+=" --from-literal=\"$(echo "${value}" | base64 -d)\""
-    done
-
-    eval "${create_cmd}" | kubectl replace --force -f -
-  done
+  create_kube_secrets "${secrets}" "${cm_namespace}"
 
   echo "Creating ClusterIssuer"
 
@@ -90,6 +75,31 @@ cert_manager() {
   yq e \
     ".spec.dnsNames=[\"${domain_name}\", \"*.${domain_name}\", \"*.ws.${domain_name}\"]" \
     "$(get_file kubernetes/tls-certificate.yaml)" | kubectl apply -f -
+}
+
+create_kube_secrets() {
+  secrets="${1}"
+  target_namespace="${2:-$NAMESPACE}"
+
+  for secretName in $(echo "${secrets}" | jq -r 'keys[]'); do
+    secretList="$(echo "${secrets}" | jq --arg KEY "${secretName}" '.[$KEY]')"
+
+    keyValuePairs="$(echo "${secretList}" | jq -r 'to_entries | .[] | @base64')"
+
+    create_cmd="kubectl create secret generic ${secretName}"
+    create_cmd+=" -n ${target_namespace}"
+    create_cmd+=" --dry-run=client"
+    create_cmd+=" -o yaml"
+
+    for pair in $keyValuePairs; do
+      key="$(echo "${pair}" | base64 -d | jq -r '.key')"
+      value="$(echo "${pair}" | base64 -d | jq -r '.value')"
+
+      create_cmd+=" --from-literal=${key}='${value}'"
+    done
+
+    eval "${create_cmd}" | kubectl replace --force -f -
+  done
 }
 
 get_file() {
@@ -128,7 +138,9 @@ install_gitpod() {
   chart_dir="tmp/chart"
 
   gitpod_config="${1}"
-  # gitpod_secrets="${2}" # @todo(sje): incorporate secrets into build
+  gitpod_secrets="${2}"
+
+  create_kube_secrets "${gitpod_secrets}"
 
   # Generate SSH private key
   if ! kubectl get secret -n "${NAMESPACE}" "${SSH_HOST_KEY_SECRET}"; then
