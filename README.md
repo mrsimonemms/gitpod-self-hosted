@@ -8,6 +8,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 * [Infrastructure](#infrastructure)
 * [Supported Cloud Providers](#supported-cloud-providers)
 * [Getting Started](#getting-started)
+  * [Create Your Terraform](#create-your-terraform)
   * [Next Steps](#next-steps)
     * [Container Storage Interface (optional)](#container-storage-interface-optional)
     * [Cert-Manager](#cert-manager)
@@ -83,6 +84,8 @@ providing any general Kubernetes support in this repository.
 > You can check out my [Gitpod App](https://github.com/mrsimonemms/gitpod-app/)
 > repo, which is the configuration for my own Gitpod installation.
 
+### Create Your Terraform
+
 This project expects you to have an understanding of how to use [Terraform](https://www.terraform.io/).
 
 1. Create a new repository
@@ -90,7 +93,9 @@ This project expects you to have an understanding of how to use [Terraform](http
 1. Import the Gitpod Module for your desired cloud provider. This
 is in the format `github.com/mrsimonemms/gitpod-self-hosted/infrastructure/providers/<provider>`
 1. Add any additional Terraform resources you want. This will typically
-be just your DNS configuration
+be your DNS configuration, but may include container registry, database
+and object storage if you don't wish to use the default configuration
+(or if your desired provide doesn't have these services)
 1. Configure your `cert_manager`, `domain_name`, `gitpod_config`,
 `gitpod_secrets` and `kubeconfig` [outputs](https://developer.hashicorp.com/terraform/language/values/outputs).
 
