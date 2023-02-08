@@ -162,7 +162,9 @@ install_gitpod() {
   installer validate config -c tmp/gitpod.config.yaml
   # Cluster validation allowed to fail as http-certifcates might not be present - kubeconfig is path inside container
   installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml || true
-  installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > ${chart_dir}/templates/gitpod.yaml
+  installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > "${chart_dir}/templates/gitpod.yaml"
+
+  post_process "${chart_dir}/templates/gitpod.yaml"
 
   # Escape any Golang template variables
   # shellcheck disable=SC2016
@@ -193,6 +195,15 @@ install_gitpod() {
     tmp/chart
 
   echo "Gitpod available on https://$(yq '.domain' tmp/gitpod.config.yaml)"
+}
+
+post_process() {
+  target="${1}"
+
+  # If using in-cluster registry, disable remote persistence as the volume can get locked on Helm upgrade
+  yq eval-all --inplace \
+    '(select(.kind == "PersistentVolumeClaim" and .metadata.name == "registry") | .spec.storageClassName) = "local-path"' \
+    "${target}"
 }
 
 stop_running_workspaces() {
