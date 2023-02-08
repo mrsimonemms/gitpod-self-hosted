@@ -13,6 +13,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
     * [Container Storage Interface (optional)](#container-storage-interface-optional)
     * [Cert-Manager](#cert-manager)
     * [Install Gitpod](#install-gitpod)
+    * [Monitoring](#monitoring)
   * [Outputs](#outputs)
     * [`cert_manager`](#cert_manager)
     * [`domain_name`](#domain_name)
@@ -157,6 +158,13 @@ curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main
   GITPOD_SECRETS="$(terraform output -json gitpod_secrets | jq -cr '@base64')" \
   bash -
 ```
+
+#### Monitoring
+
+This will also install the [MrSimonEmms/gitpod-monitoring](https://github.com/MrSimonEmms/gitpod-monitoring)
+Helm chart to the `monitoring` namespace. This is designed to provide some
+observability on your Gitpod instance. If you do not wish to install this
+chart, please set the environment variable `MONITORING_INSTALL` to `false`.
 
 ### Outputs
 

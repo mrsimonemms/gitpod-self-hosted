@@ -19,6 +19,8 @@ mkdir -p ./tmp
 GITPOD_IMAGE_SOURCE="${GITPOD_IMAGE_SOURCE:-ghcr.io/mrsimonemms/gitpod-self-hosted/installer}"
 GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-latest}"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
+MONITORING_INSTALL="${MONITORING_INSTALL:-true}"
+MONITORING_NAMESPACE="monitoring"
 NAMESPACE="gitpod"
 SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
 REPO_RAW_URL="${REPO_RAW_URL:-https://raw.githubusercontent.com/MrSimonEmms/gitpod-self-hosted/main}"
@@ -195,6 +197,22 @@ install_gitpod() {
     tmp/chart
 
   echo "Gitpod available on https://$(yq '.domain' tmp/gitpod.config.yaml)"
+
+  if [ "${MONITORING_INSTALL}" = "true" ]; then
+    echo "Installing monitoring"
+    helm upgrade \
+      --atomic \
+      --cleanup-on-fail \
+      --create-namespace \
+      --install \
+      --namespace="${MONITORING_NAMESPACE}" \
+      --repo=https://helm.simonemms.com \
+      --reset-values \
+      --set gitpodNamespace="${NAMESPACE}" \
+      --wait \
+      monitoring \
+      gitpod-monitoring
+  fi
 }
 
 post_process() {
