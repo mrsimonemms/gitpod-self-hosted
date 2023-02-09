@@ -1,5 +1,8 @@
 name: Publish installer
 on:
+  push:
+    tags:
+      - "*"
   schedule:
     - cron: "0 0 * * *"
 jobs:
@@ -21,6 +24,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get branch names
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -35,24 +42,34 @@ jobs:
           npm ci
 
       - name: Werft
+        id: werft
         run: |
           export PUPPETEER_EXECUTABLE_PATH=$(which chromium)
           node ./werft-scraper
 
-      - name: Create Docker tags
-        run: |
           # Get the tag name
           cat ./output.json
-          tag=$(cat ./output.json | jq -r '.tags[0]')
+          INSTALLER_VERSION=$(cat ./output.json | jq -r '.tags[0]')
 
-          # Pull the tag
-          docker pull eu.gcr.io/gitpod-core-dev/build/installer:${tag}
+          echo "installer_version=${INSTALLER_VERSION}" >> $GITHUB_OUTPUT
 
-          # Build the nightly
-          docker tag eu.gcr.io/gitpod-core-dev/build/installer:${tag} ghcr.io/${{ github.repository }}/installer:nightly
-          docker push ghcr.io/${{ github.repository }}/installer:nightly
+          if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ]; then
+            # Release - image tags are "latest" and tag name
 
-          # Build today's image
-          dateTag=$(date --rfc-3339=date)
-          docker tag eu.gcr.io/gitpod-core-dev/build/installer:${tag} ghcr.io/${{ github.repository }}/installer:${dateTag}
-          docker push ghcr.io/${{ github.repository }}/installer:${dateTag}
+            echo "tags=ghcr.io/${{ github.repository }}/installer:latest,ghcr.io/${{ github.repository }}/installer:${{ steps.branch-name.outputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            # Nightly - image tags are "nightly" and date
+            dateTag="$(date --rfc-3339=date)"
+
+            echo "tags=ghcr.io/${{ github.repository }}/installer:nightly,ghcr.io/${{ github.repository }}/installer:${dateTag}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Installer image
+        uses: docker/build-push-action@v4
+        with:
+          build-args: |
+            INSTALLER_VERSION=${{ steps.werft.outputs.installer_version }}
+          context: ./components/installer
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.werft.outputs.tags }}
