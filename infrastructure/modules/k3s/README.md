@@ -38,6 +38,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_firewall_ports"></a> [firewall\_ports](#output\_firewall\_ports) | n/a |
 | <a name="output_k3s_token"></a> [k3s\_token](#output\_k3s\_token) | n/a |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

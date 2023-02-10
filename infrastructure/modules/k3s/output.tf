@@ -1,3 +1,7 @@
+output "firewall_ports" {
+  value = local.firewall_ports
+}
+
 output "k3s_token" {
   value     = local.k3s_token
   sensitive = true
