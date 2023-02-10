@@ -38,61 +38,6 @@ locals {
     // @todo(sje): Medium is designed for a large number of concurrent workspaces
     large : {},
   }
-  firewall = [
-    {
-      description = "Gitpod SSH"
-      port        = "22"
-    },
-    {
-      description = "SSH"
-      port        = "2244"
-    },
-    {
-      description = "HTTP"
-      port        = "80"
-    },
-    {
-      description = "HTTPS"
-      port        = "443"
-    },
-    {
-      description = "Kubernetes"
-      port        = "6443"
-    },
-    {
-      description = "k3s"
-      port        = "2379-2380"
-    },
-    {
-      description = "k3s"
-      protocol    = "udp"
-      port        = "8472"
-    },
-    {
-      description = "k3s"
-      protocol    = "udp"
-      port        = "51820"
-    },
-    {
-      description = "k3s"
-      protocol    = "udp"
-      port        = "51821"
-    },
-    {
-      description = "k3s"
-      protocol    = "udp"
-      port        = "10250"
-    },
-    {
-      description = "DNS"
-      protocol    = "udp"
-      port        = "53"
-    },
-    {
-      description = "DNS"
-      port        = "53"
-    },
-  ]
   vm_public_key  = file(var.ssh_public_key_path)
   vm_private_key = file(var.ssh_private_key_path)
   vm_username    = "gitpod"
