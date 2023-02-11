@@ -1,0 +1,60 @@
+# Kubernetes resources used by the CI instance
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitpod
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ci-selfsigned
+  namespace: gitpod
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gitpod-ci-selfsigned
+  namespace: gitpod
+spec:
+  isCA: true
+  commonName: gitpod-ci-selfsigned
+  secretName: gitpod-ci-selfsigned
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: ci-selfsigned
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: gitpod-ci-issuer
+  namespace: gitpod
+spec:
+  ca:
+    secretName: gitpod-ci-selfsigned
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: https-certificates
+  namespace: gitpod
+  labels:
+    app: gitpod
+spec:
+  secretName: https-certificates
+  issuerRef:
+    name: gitpod-ci-issuer
+    kind: Issuer
+  dnsNames:
+    - "${DOMAIN}"
+    - "*.${DOMAIN}"
+    - "*.ws.${DOMAIN}"
+  secretTemplate:
+    labels:
+      app: gitpod
