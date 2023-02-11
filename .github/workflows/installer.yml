@@ -1,18 +1,33 @@
 name: Publish installer
 on:
+  # Monthly release
   push:
     tags:
       - "*"
+  # Nightly build
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 1 * * *"
+env:
+  DOMAIN: test.gitpod-self-hosted.dev
+  HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
 jobs:
   installer:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+      - name: Get branch names
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+      - name: Check tagged version
+        id: tagged_version
+        if: steps.branch-name.outputs.is_tag == 'true'
+        run: |
+          version="$(cat ./version)"
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - uses: 3bit/setup-hcloud@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -24,45 +39,37 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get branch names
-        id: branch-name
-        uses: tj-actions/branch-names@v6
-
       - uses: actions/setup-node@v3
+        if: steps.branch-name.outputs.is_tag == 'false'
         with:
           node-version: 16
 
-      - uses: browser-actions/setup-chrome@v1
+      - if: steps.branch-name.outputs.is_tag == 'false'
+        uses: browser-actions/setup-chrome@v1
 
-      - run: chrome --version
-
-      - name: Install dependencies
-        run: |
-          cd ./werft-scraper
-          npm ci
-
-      - name: Werft
+      - name: Scrape Werft
         id: werft
         run: |
-          export PUPPETEER_EXECUTABLE_PATH=$(which chromium)
-          node ./werft-scraper
+          if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ]; then
+            INSTALLER_VERSION="${{ steps.tagged_version.outputs.version }}"
+          elif [ "${{ github.event_name == 'schedule' }}" = true ]; then
+            chrome --version
+            cd ./werft-scraper
+            npm ci
 
-          # Get the tag name
-          cat ./output.json
-          INSTALLER_VERSION=$(cat ./output.json | jq -r '.tags[0]')
+            export PUPPETEER_EXECUTABLE_PATH=$(which chromium)
+            node ./werft-scraper
+
+            # Get the tag name
+            cat ./output.json
+            INSTALLER_VERSION=$(cat ./output.json | jq -r '.tags[0]')
+          fi
 
           echo "installer_version=${INSTALLER_VERSION}" >> $GITHUB_OUTPUT
 
-          if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ]; then
-            # Release - image tags are "latest" and tag name
-
-            echo "tags=ghcr.io/${{ github.repository }}/installer:latest,ghcr.io/${{ github.repository }}/installer:${{ steps.branch-name.outputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            # Nightly - image tags are "nightly" and date
-            dateTag="$(date --rfc-3339=date)"
-
-            echo "tags=ghcr.io/${{ github.repository }}/installer:nightly,ghcr.io/${{ github.repository }}/installer:${dateTag}" >> $GITHUB_OUTPUT
-          fi
+      - name: Installer version
+        run: |
+          echo ${{ steps.werft.outputs.installer_version }}
 
       - name: Build Installer image
         uses: docker/build-push-action@v4
@@ -70,6 +77,137 @@ jobs:
           build-args: |
             INSTALLER_VERSION=${{ steps.werft.outputs.installer_version }}
           context: ./components/installer
+          labels: |
+            org.opencontainers.image.version="${{ steps.werft.outputs.installer_version }}"
+            org.opencontainers.image.description="Gitpod Installer"
+          load: true
           platforms: linux/amd64
-          push: true
-          tags: ${{ steps.werft.outputs.tags }}
+          push: false
+          tags: installer
+
+      - name: Create resources in Hetzner
+        env:
+          EXTRA_ARGS: "--node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true"
+        run: |
+          mkdir -p $HOME/.ssh
+          echo ${{ secrets.SSH_KEY_BASE64 }} | base64 -d > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+
+          hcloud server create \
+            --name github-actions-$GITHUB_RUN_ID \
+            --image ubuntu-20.04 \
+            --location nbg1 \
+            --type cx41 \
+            --ssh-key "GitHub Actions" \
+            --user-data-from-file=./cloud-init/k3s_manager.yaml
+
+          IP=$(hcloud server ip github-actions-$GITHUB_RUN_ID)
+
+          # Wait for SSH to run on port 2244
+          until $(ssh-keyscan -p 2244 "${IP}" >> ~/.ssh/known_hosts)
+          do
+            echo -n "."
+            sleep 1
+          done
+          echo ""
+
+          cat << EOF > ./registries.yaml
+          configs:
+            "reg.${DOMAIN}:20000":
+              tls:
+                insecure_skip_verify: true
+          EOF
+
+          ssh "root@${IP}" -p 2244 "mkdir -p /etc/rancher/k3s"
+          scp -P 2244 ./registries.yaml "root@${IP}:/etc/rancher/k3s/registries.yaml"
+
+          curl -sLS https://get.k3sup.dev | sudo sh
+
+          mkdir -p "${HOME}/.kube"
+
+          k3sup install \
+            --ip "${IP}" \
+            --local-path "${HOME}/.kube/config" \
+            --merge \
+            --k3s-channel="stable" \
+            --k3s-extra-args="--disable traefik ${EXTRA_ARGS}" \
+            --ssh-port 2244 \
+            user root
+
+          kubectl wait --for=condition=ready node --all
+
+          kubectl get nodes --show-labels
+
+      - name: Install cert-manager
+        run: |
+          helm upgrade \
+            --atomic \
+            --cleanup-on-fail \
+            --create-namespace \
+            --install \
+            --namespace "cert-manager" \
+            --repo https://charts.jetstack.io \
+            --reset-values \
+            --set installCRDs=true \
+            --set 'extraArgs={--dns01-recursive-nameservers-only=true,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}' \
+            --version ^1.11.0 \
+            --wait \
+            cert-manager cert-manager
+
+          envsubst < dev/k3s.ci.yaml | kubectl apply -f -
+
+          kubectl wait --for=condition=ready -n gitpod certificate gitpod-ci-selfsigned
+
+          kubectl get secrets -n gitpod gitpod-ci-selfsigned -o jsonpath='{.data.ca\.crt}' | base64 -d > gitpod.crt
+
+          IP=$(hcloud server ip github-actions-$GITHUB_RUN_ID)
+
+          ssh "root@${IP}" -p 2244 "echo '127.0.0.1 ${DOMAIN}' >> /etc/hosts"
+
+          ssh "root@${IP}" -p 2244 "apt-get install -y ca-certificates"
+          scp -P 2244 gitpod.crt "root@${IP}:/usr/local/share/ca-certificates"
+          ssh "root@${IP}" -p 2244 "update-ca-certificates"
+
+          ssh "root@${IP}" -p 2244 "service k3s restart"
+          kubectl wait --for=condition=ready node --all
+
+      - name: Install Gitpod
+        env:
+          CLEANUP_FAILED_UPGRADE: "false"
+          DOCKER_PULL: never
+          GITPOD_IMAGE_SOURCE: installer
+          MONITORING_INSTALL: "false"
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+          yq -V
+
+          echo "Installing Gitpod to server"
+          bash ./install.sh install_gitpod "$(envsubst < ./dev/gitpod.config.yaml | base64)"
+
+          kubectl get pods -n gitpod --sort-by=.metadata.name
+
+      - name: Destroy resources in Hetzner
+        if: ${{ always() }}
+        run: |
+          hcloud server delete github-actions-$GITHUB_RUN_ID || true
+
+      - name: Publish Docker image
+        run: |
+          if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ]; then
+            # Tag
+            docker tag installer ghcr.io/${{ github.repository }}/installer:latest
+            docker tag installer ghcr.io/${{ github.repository }}/installer:${{ steps.branch-name.outputs.tag }}
+
+            docker push ghcr.io/${{ github.repository }}/installer:latest
+            docker push ghcr.io/${{ github.repository }}/installer:${{ steps.branch-name.outputs.tag }}
+          elif [ "${{ github.event_name == 'schedule' }}" = true ]; then
+            # Nightly - image tags are "nightly" and date
+            dateTag="$(date --rfc-3339=date)"
+
+            docker tag installer ghcr.io/${{ github.repository }}/installer:nightly
+            docker tag installer ghcr.io/${{ github.repository }}/installer:${dateTag}
+
+            docker push ghcr.io/${{ github.repository }}/installer:nightly
+            docker push ghcr.io/${{ github.repository }}/installer:${dateTag}
+          fi

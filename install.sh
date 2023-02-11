@@ -16,6 +16,8 @@ fi
 
 mkdir -p ./tmp
 
+CLEANUP_FAILED_UPGRADE="${CLEANUP_FAILED_UPGRADE:-true}"
+DOCKER_PULL="${DOCKER_PULL:-always}"
 GITPOD_IMAGE_SOURCE="${GITPOD_IMAGE_SOURCE:-ghcr.io/mrsimonemms/gitpod-self-hosted/installer}"
 GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-latest}"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
@@ -128,7 +130,7 @@ installer() {
     -v="${KUBECONFIG}:/root/.kube/config" \
     -v="${PWD}:${PWD}" \
     -w="${PWD}" \
-    --pull=always \
+    --pull="${DOCKER_PULL}" \
     --entrypoint="${ENTRYPOINT:-/app/installer}" \
     "${GITPOD_IMAGE_SOURCE}:${GITPOD_INSTALLER_VERSION}" \
     "${@}"
@@ -185,8 +187,8 @@ install_gitpod() {
 
   echo "Installing Gitpod with Helm with ${helm_timeout} timeout"
   helm upgrade \
-    --atomic \
-    --cleanup-on-fail \
+    --atomic="${CLEANUP_FAILED_UPGRADE}" \
+    --cleanup-on-fail="${CLEANUP_FAILED_UPGRADE}" \
     --create-namespace \
     --install \
     --namespace="${NAMESPACE}" \
