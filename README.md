@@ -341,10 +341,10 @@ I would like to see support for:
 - Google Cloud Platform
 - Microsoft Azure
 
-Work on these platform will cost money to get resources spun up. If you want me to
-work on these for your own Gitpod installation, I will only be able to do so if you
-can provide me an account to cover the cost of creating these resources for testing
-purposes.
+Work on these platforms will cost money to get resources spun up. If you want me
+to work on these for your own Gitpod installation, I will only be able to do so
+if you can provide me an account to cover the cost of creating these resources
+for testing purposes.
 
 I'm happy to receive pull requests for these platforms from contributors. As above,
 I will need to be able to test these before they're merged to `main` - pull requests
