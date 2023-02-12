@@ -4,18 +4,6 @@ image:
 tasks:
   - name: Setup
     before: |
-      curl -sfL gpm.simonemms.com | bash
-
-      gpm install helm kubectl pre-commit tfenv yq
-
-      mkdir -p $HOME/.kube
-
-      # Install latest terraform
-      tfenv install
-      tfenv use
-
-      go install github.com/terraform-docs/terraform-docs@latest
-
       gp sync-done setup
 
       pre-commit install --install-hooks -t pre-commit -t commit-msg
