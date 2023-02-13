@@ -18,7 +18,7 @@ save-kubeconfig:
 	@mkdir -p ${HOME}/.kube
 
 	@cd ${EXAMPLES_DIR}/${PROVIDER} && terraform output -json kubeconfig | jq -r > ${HOME}/.kube/config
-	chmod 600 ${HOME}/.kube/config
+	@chmod 600 ${HOME}/.kube/config
 
 	@echo "Kubeconfig saved to ${HOME}/.kube/config"
 .PHONY: save-kubeconfig
