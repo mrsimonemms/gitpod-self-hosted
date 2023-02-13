@@ -21,7 +21,7 @@ packages:
   - linux-headers-generic
   - make
   - runc
-runcmd:
+bootcmd:
 # Change SSH port
   - |
     if grep -q "^Port 22$" /etc/ssh/sshd_config; then
@@ -30,6 +30,7 @@ runcmd:
       echo "Port 2244" >> /etc/ssh/sshd_config
     fi
   - service ssh restart
+runcmd:
 # Install ShiftFS - 5.16 works with Ubuntu 20.04
   - [ git, clone, -b, k5.16, "https://github.com/toby63/shiftfs-dkms.git", /shiftfs-k516 ]
   - [ make, -f, /shiftfs-k516/Makefile.dkms, -C, /shiftfs-k516 ]
