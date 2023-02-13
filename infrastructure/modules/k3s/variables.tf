@@ -1,3 +1,8 @@
+variable "load_balancer_address" {
+  type    = string
+  default = null
+}
+
 variable "managers" {
   type = list(object({
     node = object({

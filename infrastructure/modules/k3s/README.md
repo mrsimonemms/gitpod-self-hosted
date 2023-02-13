@@ -32,6 +32,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_load_balancer_address"></a> [load\_balancer\_address](#input\_load\_balancer\_address) | n/a | `string` | `null` | no |
 | <a name="input_managers"></a> [managers](#input\_managers) | n/a | <pre>list(object({<br>    node = object({<br>      name       = string<br>      public_ip  = string<br>      private_ip = string<br>      username   = string<br>    })<br>    labels      = map(bool)<br>    private_key = string<br>  }))</pre> | `[]` | no |
 
 ## Outputs
