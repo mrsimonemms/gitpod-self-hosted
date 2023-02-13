@@ -24,6 +24,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 * [Versioning](#versioning)
 * [Roadmap](#roadmap)
 * [Support](#support)
+* [Referral Links](#referral-links)
 
 <!-- Regenerate with "pre-commit run -a markdown-toc" -->
 
@@ -78,7 +79,7 @@ providing any general Kubernetes support in this repository.
 
 ## Supported Cloud Providers
 
-* [Hetzner](https://www.hetzner.com/cloud)
+* [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p)
 
 ## Getting Started
 
@@ -357,3 +358,10 @@ Please [contact me](https://www.simonemms.com/contact) to discuss further.
 
 I'm happy to discuss options for commercial support contracts. Please
 [contact me](https://www.simonemms.com/contact) to discuss further.
+
+## Referral Links
+
+Using these links will help support the project and provide you with additional
+credits for the cloud provider.
+
+* [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p)
