@@ -8,7 +8,9 @@ resource "ssh_resource" "install_primary_manager" {
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
     # Install k3s with additional labels
-    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${length(local.additional_managers) > 0 ? "--cluster-init" : ""} ${join(" ", [for k, v in local.primary_manager.labels : "--node-label=${k}=${v}"])} --disable traefik\" sh -'"
+    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${length(local.additional_managers) > 0 ? "--cluster-init" : ""} ${join(" ", [for k, v in local.primary_manager.labels : "--node-label=${k}=${v}"])} --disable traefik\" sh -'",
+    # Disable scheduling to the node if multiple managers
+    length(local.additional_managers) == 0 ? "" : "kubectl taint nodes --overwrite $(hostname) app=gitpod-sh:NoSchedule",
   ]
 }
 
@@ -28,17 +30,17 @@ resource "ssh_sensitive_resource" "kubeconfig" {
   port        = 2244
 
   commands = [
-    "sudo sed \"s/127.0.0.1/${local.primary_manager.node.public_ip}/g\" /etc/rancher/k3s/k3s.yaml"
+    "sudo sed \"s/127.0.0.1/${local.k3s_server_address_public}/g\" /etc/rancher/k3s/k3s.yaml"
   ]
 }
 
-// Only run on first manager node
+# Run against any manager
 resource "ssh_sensitive_resource" "k3s_token" {
   depends_on = [
     ssh_resource.install_primary_manager
   ]
 
-  host        = local.primary_manager.node.public_ip
+  host        = local.k3s_server_address_public
   user        = local.primary_manager.node.username
   private_key = local.primary_manager.private_key
   port        = 2244
@@ -64,6 +66,8 @@ resource "ssh_resource" "install_additional_managers" {
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
     # Install k3s with additional labels
-    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${join(" ", [for k, v in local.additional_managers[count.index].labels : "--node-label=${k}=${v}"])} --disable traefik\" K3S_URL=\"https://${local.primary_manager.node.private_ip}:6443\" K3S_TOKEN=\"${local.k3s_token}\" sh -'"
+    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${join(" ", [for k, v in local.additional_managers[count.index].labels : "--node-label=${k}=${v}"])} --disable traefik\" K3S_URL=\"https://${local.k3s_server_address_private}:6443\" K3S_TOKEN=\"${local.k3s_token}\" sh -'",
+    # Disable scheduling to the node if multiple managers
+    length(local.additional_managers) == 0 ? "" : "kubectl taint nodes --overwrite $(hostname) app=gitpod-sh:NoSchedule",
   ]
 }
