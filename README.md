@@ -6,6 +6,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 
 * [About](#about)
 * [Infrastructure](#infrastructure)
+* [Cluster Sizes](#cluster-sizes)
 * [Supported Cloud Providers](#supported-cloud-providers)
 * [Getting Started](#getting-started)
   * [Create Your Terraform](#create-your-terraform)
@@ -54,6 +55,7 @@ In fact, by design this project will only allow you to configure five things:
 1. The domain name it's run on
 1. The location it runs in
 1. The size of the installation - `small` (for PoCs), `medium` and `large`
+(see [Cluster Sizes](#cluster-sizes))
 1. The SSH key used to access the virtual machines
 
 A more detailed explanation and reasoning on why I'm still passionate about Gitpod
@@ -76,6 +78,26 @@ by using k3s-only.
 **IMPORTANT** this is _NOT_ a good project for a Kubernetes beginner. Whilst I laud
 any effort for self-improvement, Gitpod is not the project to do it on. I won't be
 providing any general Kubernetes support in this repository.
+
+## Cluster Sizes
+
+There is a standard approach provided for the size of clusters. As this project is
+designed to be railways tracks for installing Gitpod, the cluster size is the main
+method of configuration. Any user-defined data is configured in the `size_data`
+variable - there is limited validation on this parameter and will be ignored if
+an unsupported `size` is usedl
+
+| Name | Purpose | Manager Highly-Available | Manager Nodes | Worker Nodes | Worker Clusters |
+| --- | --- | --- | --- | --- | --- |
+| `small` | PoCs and personal developer environments | No | 1 x 4vCPU, 16GB RAM | 1 x 4vCPU, 16GB RAM | 1 |
+| `medium` | Small development teams | Yes | 3 x [smallest usable machine](https://docs.k3s.io/installation/requirements#large-clusters) | 3-100 x 4vCPU, 16GB RAM | 1 |
+| `large` | Large development teams | Yes | 3 x user-defined | Auto-scaled, user-defined  | User-defined |
+
+The `large` cluster may not be supported in all cloud providers. This is dependent
+upon the cloud provider having some form of auto-scaling ability for virtual machines.
+
+In future, there may be support for `extra-large` clusters with support for a multi-region
+installation for international development teams.
 
 ## Supported Cloud Providers
 
