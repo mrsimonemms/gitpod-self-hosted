@@ -51,6 +51,7 @@ have. This project will have an intentionally limited number of things that you 
 configure so that your installation works reliably.
 
 In fact, by design this project will only allow you to configure five things:
+
 1. The cloud you run it on
 1. The domain name it's run on
 1. The location it runs in
@@ -348,9 +349,10 @@ there was an RFC about switching from Werft to GitHub Actions. Watch this space 
 more information.
 
 This project maintains two tagged versions of the Installer:
-- `nightly`: a daily version, generated from the most recent version at midnight
+
+* `nightly`: a daily version, generated from the most recent version at midnight
 UTC. This is also tagged with a date tag, in format `YYYY-MM-DD`.
-- `latest`: a monthly supported version. This is also tagged with a version tag,
+* `latest`: a monthly supported version. This is also tagged with a version tag,
 in a semver-like format `YYYY.MM.<patch>`. It is recommended you use this.
 
 To define your version, set the `GITPOD_INSTALLER_VERSION` environment variable.
@@ -360,11 +362,13 @@ If unset, it will be `latest`.
 
 The roadmap will largely depend upon the community response to this repository. Ideally,
 I would like to see support for:
-- Amazon Web Services
-- Civo Cloud
-- DigitalOcean
-- Google Cloud Platform
-- Microsoft Azure
+
+* Amazon Web Services
+* Civo Cloud
+* DigitalOcean
+* Google Cloud Platform
+* Microsoft Azure
+* Scaleway
 
 Work on these platforms will cost money to get resources spun up. If you want me
 to work on these for your own Gitpod installation, I will only be able to do so
