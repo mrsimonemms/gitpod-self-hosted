@@ -11,6 +11,26 @@ tasks:
       gp sync-done pre-commit
 
       exit 0
+  - name: Azure
+    command: |
+      gp sync-await setup
+
+      if [ -n "${ARM_CLIENT_ID}" ] && [ -n "${ARM_CLIENT_SECRET}" ] && [ -n "${ARM_SUBSCRIPTION_ID}" ] && [ -n "${ARM_TENANT_ID}" ]; then
+        echo "Initializing Azure"
+        az login --service-principal \
+          --username "${ARM_CLIENT_ID}" \
+          --password "${ARM_CLIENT_SECRET}" \
+          --tenant "${ARM_TENANT_ID}"
+
+        echo "Download Azure MySQL SSL CA certificate"
+        curl -fsSL https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -o examples/azure/mysql-ssl.crt.pem
+
+        if [ -n "${TF_STATE_AZURE_RESOURCE_GROUP}" ] && [ -n "${TF_STATE_AZURE_ACCOUNT_NAME}" ] && [ -n "${TF_STATE_AZURE_CONTAINER_NAME}" ] && [ -n "${TF_STATE_AZURE_KEY}" ]; then
+          make azure-init
+        fi
+      fi
+
+      exit 0
   - name: Hetzner
     command: |
       gp sync-await setup
