@@ -42,6 +42,9 @@ hetzner() {
 ############
 
 case "${cmd}" in
+  azure )
+    echo "Warning: Azure has no supported CSI driver"
+    ;;
   hetzner )
     hetzner "${HCLOUD_TOKEN:-$2}"
     ;;

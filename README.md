@@ -108,9 +108,10 @@ installation for international development teams.
 
 ## Supported Cloud Providers
 
-| Provider | Supported Sizes |
-| --- | --- |
-| [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p) | small, medium |
+| Provider | Supported Sizes | Notes |
+| --- | --- | --- |
+| [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p) | small, medium | |
+| [Microsoft Azure](https://https://azure.microsoft.com) | small | <ul><li>Requires 2 x 4CPU, 16GB VMs - this is above the free trial quota so will need a paid Azure account</li><li>Azure Storage is not S3-compatible, [so does not work with Gitpod storage](https://github.com/gitpod-io/gitpod/pull/16081)</li><li>Further work will require access to a paid Azure account</li></ul> |
 
 ## Getting Started
 
@@ -319,8 +320,7 @@ Like the [`cert_manager`](#cert_manager) output, these will have the secret
 name as the top-level key and then any secrets as key/value pairs.
 
 This example is how one might define the `database` secret for an Azure
-MySQL database - this is based upon [an old project](https://github.com/mrsimonemms/gitpod-self-hosted-infrastructure/blob/main/infrastructure/azure/output.tf#L24)
-as Azure is not yet supported by this project.
+MySQL database.
 
 ```terraform
 output "gitpod_secrets" {
@@ -328,10 +328,10 @@ output "gitpod_secrets" {
     database = {
       # If unsure, use this key
       encryptionKeys = "[{\"name\":\"general\",\"version\":1,\"primary\":true,\"material\":\"4uGh1q8y2DYryJwrVMHs0kWXJlqvHWWt/KJuNi04edI=\"}]"
-      host           = "${azurerm_mysql_server.db.0.name}.mysql.database.azure.com"
-      password       = azurerm_mysql_server.db.0.administrator_login_password
+      host           = "${azurerm_mysql_server.db.name}.mysql.database.azure.com"
+      password       = azurerm_mysql_server.db.administrator_login_password
       port           = 3306
-      username       = "${azurerm_mysql_server.db.0.administrator_login}@${azurerm_mysql_server.db.0.name}"
+      username       = "${azurerm_mysql_server.db.administrator_login}@${azurerm_mysql_server.db.name}"
     }
   }
   sensitive = true
@@ -389,7 +389,6 @@ I would like to see support for:
 * Civo Cloud
 * DigitalOcean
 * Google Cloud Platform
-* Microsoft Azure
 * Scaleway
 
 Work on these platforms will cost money to get resources spun up. If you want me

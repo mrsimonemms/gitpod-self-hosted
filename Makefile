@@ -40,6 +40,30 @@ tls-restore:
 # Providers
 ###
 
+azure-init:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/azure \
+		init \
+		-backend-config=resource_group_name="${TF_STATE_AZURE_RESOURCE_GROUP}" \
+		-backend-config=storage_account_name="${TF_STATE_AZURE_ACCOUNT_NAME}" \
+		-backend-config=container_name="${TF_STATE_AZURE_CONTAINER_NAME}" \
+		-backend-config=key="${TF_STATE_AZURE_KEY}"
+.PHONY: azure-init
+
+azure-apply:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/azure \
+		apply
+
+	PROVIDER=azure $(MAKE) save-kubeconfig cert-manager install-gitpod
+.PHONY: azure-apply
+
+azure-destroy:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/azure \
+		destroy
+.PHONY: azure-destroy
+
 hetzner-init:
 	@terraform \
 		-chdir=${EXAMPLES_DIR}/hetzner \
