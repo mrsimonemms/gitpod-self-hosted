@@ -56,6 +56,7 @@ jobs:
             chrome --version
             cd ./werft-scraper
             npm ci
+            cd ../
 
             export PUPPETEER_EXECUTABLE_PATH=$(which chromium)
             node ./werft-scraper
