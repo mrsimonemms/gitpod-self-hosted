@@ -12,6 +12,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
   * [Create Your Terraform](#create-your-terraform)
   * [Next Steps](#next-steps)
     * [Container Storage Interface (optional)](#container-storage-interface-optional)
+      * [A Word On The Container Registry](#a-word-on-the-container-registry)
     * [Cert-Manager](#cert-manager)
     * [Install Gitpod](#install-gitpod)
     * [Monitoring](#monitoring)
@@ -133,13 +134,21 @@ your k3s instance and install Gitpod.
 
 #### Container Storage Interface (optional)
 
-A CSI driver is used to configure how the Kubernetes cluster saves persistent
-data. k3s uses `local-path` storage by default, which saves the data to the
-node. That's fine, but not necessarily performant and, if the node is evicted,
-the data is lost.
+> This is an optional step and only recommended if you are going to use the in-cluster
+> database or object storage services. Gitpod creates no other persistent volume
+> claims.
+>
+> In-cluster services are provided as a convenience. These can be difficult to
+> scale and backup, so should only be used if there is no alternative.
 
-For each of the providers, a CSI driver is given to save data to the cloud's
-volume implementation.
+A [Container Storage Interface (CSI)](https://kubernetes-csi.github.io) driver
+is used to configure how the Kubernetes cluster saves persistent data. k3s uses
+`local-path` storage by default, which saves the data to the node. That's fine,
+but is not necessarily performant and, if the node is evicted, the data is lost.
+
+Where possible, a CSI driver is given to save data to the cloud's volume
+implementation. They may not exist for every provider, especially if the provider
+maintains a managed database and storage option.
 
 Here's how to install the Hetzner CSI. Notice the `HCLOUD_TOKEN`, which is
 required to manage volumes.
@@ -151,7 +160,15 @@ curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main
   bash -
 ```
 
-This is an optional step, but strongly recommended.
+##### A Word On The Container Registry
+
+The container registry is not a critical part of the system. It stores no data
+aside from images generated for a workspace. If the workspace no longer exists,
+it will be rebuilt.
+
+There is no reason to put effort into backing up the container registry because
+the resources will be rebuilt to the desired state. The reason the container
+registry exists is to avoid having to build workspace images needlessly.
 
 #### Cert-Manager
 
