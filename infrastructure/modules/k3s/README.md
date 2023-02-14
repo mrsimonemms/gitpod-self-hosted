@@ -7,13 +7,13 @@ Install k3s
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_ssh"></a> [ssh](#requirement\_ssh) | 2.3.0 |
+| <a name="requirement_ssh"></a> [ssh](#requirement\_ssh) | >=2.3.0, < 3.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_ssh"></a> [ssh](#provider\_ssh) | 2.3.0 |
+| <a name="provider_ssh"></a> [ssh](#provider\_ssh) | >=2.3.0, < 3.0.0 |
 
 ## Modules
 
@@ -23,10 +23,10 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [ssh_resource.install_additional_managers](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/resource) | resource |
-| [ssh_resource.install_primary_manager](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/resource) | resource |
-| [ssh_sensitive_resource.k3s_token](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/sensitive_resource) | resource |
-| [ssh_sensitive_resource.kubeconfig](https://registry.terraform.io/providers/loafoe/ssh/2.3.0/docs/resources/sensitive_resource) | resource |
+| [ssh_resource.install_additional_managers](https://registry.terraform.io/providers/loafoe/ssh/latest/docs/resources/resource) | resource |
+| [ssh_resource.install_primary_manager](https://registry.terraform.io/providers/loafoe/ssh/latest/docs/resources/resource) | resource |
+| [ssh_sensitive_resource.k3s_token](https://registry.terraform.io/providers/loafoe/ssh/latest/docs/resources/sensitive_resource) | resource |
+| [ssh_sensitive_resource.kubeconfig](https://registry.terraform.io/providers/loafoe/ssh/latest/docs/resources/sensitive_resource) | resource |
 
 ## Inputs
 
