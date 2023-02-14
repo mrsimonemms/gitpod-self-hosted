@@ -101,7 +101,9 @@ installation for international development teams.
 
 ## Supported Cloud Providers
 
-* [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p)
+| Provider | Supported Sizes |
+| --- | --- |
+| [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p) | small, medium |
 
 ## Getting Started
 
