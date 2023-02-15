@@ -67,7 +67,7 @@ locals {
       protocol = "TCP"
     },
     {
-      name     = "DNS"
+      name     = "DNS - UDP"
       start    = 53
       end      = 53
       protocol = "UDP"
