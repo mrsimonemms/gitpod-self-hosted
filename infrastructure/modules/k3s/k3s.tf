@@ -8,7 +8,7 @@ resource "ssh_resource" "install_primary_manager" {
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
     # Install k3s with additional labels
-    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${length(local.additional_managers) > 0 ? "--cluster-init" : ""} ${join(" ", [for k, v in local.primary_manager.labels : "--node-label=${k}=${v}"])} --disable traefik\" sh -'",
+    "bash -c 'curl https://get.k3s.io | INSTALL_K3S_EXEC=\"server ${length(local.additional_managers) > 0 ? "--cluster-init" : ""} ${join(" ", [for k, v in local.primary_manager.labels : "--node-label=${k}=${v}"])} --tls-san=${local.k3s_server_address_public} --disable traefik\" sh -'",
     # Disable scheduling to the node if multiple managers
     length(local.additional_managers) == 0 ? "" : "kubectl taint nodes --overwrite $(hostname) app=gitpod-sh:NoSchedule",
   ])
