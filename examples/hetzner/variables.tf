@@ -7,6 +7,7 @@ variable "domain_name" {
 variable "location" {
   description = "Data centre location - this is dependent upon your provider"
   type        = string
+  default     = "nbg1"
 }
 
 variable "size" {
