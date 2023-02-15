@@ -1,6 +1,6 @@
 # Hetzner
 
-How to run Gitpod on [Hetzner](https://www.hetzner.com)
+How to run Gitpod on [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p)
 
 ## Architecture
 
