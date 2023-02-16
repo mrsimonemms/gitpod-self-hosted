@@ -104,11 +104,19 @@ jobs:
 
           IP=$(hcloud server ip github-actions-$GITHUB_RUN_ID)
 
-          # Wait for SSH to run on port 2244
+          echo "Wait for SSH to run on port 2244"
           until $(ssh-keyscan -p 2244 "${IP}" >> ~/.ssh/known_hosts)
           do
             echo -n "."
             sleep 1
+          done
+          echo ""
+
+          echo "Wait for the cloud-init script to have finished"
+          until $((ssh "root@${IP}" -p 2244 "cloud-init status --format json" || echo "{}") | jq -r '.status == "done"')
+          do
+            echo -n "."
+            sleep 10
           done
           echo ""
 
@@ -184,9 +192,19 @@ jobs:
           yq -V
 
           echo "Installing Gitpod to server"
-          bash ./install.sh install_gitpod "$(envsubst < ./dev/gitpod.config.yaml | base64)"
+          if ! bash ./install.sh install_gitpod "$(envsubst < ./dev/gitpod.config.yaml | base64)"; then
+            echo "Gitpod failed to install"
 
-          kubectl get pods -n gitpod --sort-by=.metadata.name
+            echo "--- All resources ---"
+            kubectl get all -n gitpod
+            echo "--- Pods ---"
+            kubectl get pods -n gitpod --sort-by=.metadata.name
+            echo "---"
+
+            exit 1
+          fi
+
+          echo "Gitpod installed successfully"
 
       - name: Destroy resources in Hetzner
         if: ${{ always() }}
