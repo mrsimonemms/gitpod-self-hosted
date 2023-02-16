@@ -7,7 +7,7 @@ import puppeteer from "puppeteer";
 
   await page.goto("https://werft.gitpod-dev.com");
 
-  const inputs = ["gitpod-build-main", "success"];
+  const inputs = ["gitpod-build-main", "success", "done"];
 
   for (const input of inputs) {
     // Type into search box
