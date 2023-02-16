@@ -1,4 +1,4 @@
-# Gitpod Self-Hosted
+# Gitpod Self-Hosted Instructions
 
 Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 
@@ -31,6 +31,11 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 <!-- Regenerate with "pre-commit run -a markdown-toc" -->
 
 <!-- tocstop -->
+
+This is a community-maintained project containing instructions on how to run
+Gitpod in your own infrastructure. This is original work, not a fork of Gitpod
+and is not affialiated to Gitpod in any way. Gitpod is licenced under [AGPL-3.0](https://github.com/gitpod-io/gitpod/blob/main/LICENSE.md)
+and all Gitpod components are used under that licence.
 
 ## About
 
