@@ -161,7 +161,7 @@ install_gitpod() {
   yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
 
   mkdir -p ${chart_dir}/templates
-  cp "$(get_file chart/gitpod/Chart.yaml)" ${chart_dir}/Chart.yaml
+  cp "$(get_file chart/gitpod-self-hosted/Chart.yaml)" ${chart_dir}/Chart.yaml
 
   installer validate config -c tmp/gitpod.config.yaml
   # Cluster validation allowed to fail as http-certifcates might not be present - kubeconfig is path inside container

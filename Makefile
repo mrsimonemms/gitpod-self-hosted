@@ -1,5 +1,4 @@
 EXAMPLES_DIR = ./examples
-CHART_DIR = chart/gitpod
 
 cert-manager:
 	@bash ./install.sh cert_manager \
