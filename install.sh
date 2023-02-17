@@ -24,8 +24,9 @@ KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
 MONITORING_INSTALL="${MONITORING_INSTALL:-true}"
 MONITORING_NAMESPACE="monitoring"
 NAMESPACE="gitpod"
-SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
 REPO_RAW_URL="${REPO_RAW_URL:-https://raw.githubusercontent.com/MrSimonEmms/gitpod-self-hosted/main}"
+SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
+TLS_CERT_ISSUE_TIMEOUT="${TLS_CERT_ISSUE_TIMEOUT:-15m}"
 
 # Create the Gitpod namespace
 kubectl create namespace "${NAMESPACE}" || true
@@ -79,6 +80,14 @@ cert_manager() {
   yq e \
     ".spec.dnsNames=[\"${domain_name}\", \"*.${domain_name}\", \"*.ws.${domain_name}\"]" \
     "$(get_file kubernetes/tls-certificate.yaml)" | kubectl apply -f -
+
+  echo "Waiting ${TLS_CERT_ISSUE_TIMEOUT} for Gitpod TLS certificate to be issued..."
+  kubectl wait \
+    --for=condition=ready \
+    -n gitpod \
+    --timeout="${TLS_CERT_ISSUE_TIMEOUT}" \
+    certificate \
+    https-certificates
 }
 
 create_kube_secrets() {
@@ -164,8 +173,7 @@ install_gitpod() {
   cp "$(get_file chart/gitpod-self-hosted/Chart.yaml)" ${chart_dir}/Chart.yaml
 
   installer validate config -c tmp/gitpod.config.yaml
-  # Cluster validation allowed to fail as http-certifcates might not be present - kubeconfig is path inside container
-  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml || true
+  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml
   installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > "${chart_dir}/templates/gitpod.yaml"
 
   post_process "${chart_dir}/templates/gitpod.yaml"
