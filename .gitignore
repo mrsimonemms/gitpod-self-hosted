@@ -12,7 +12,7 @@ Thumbs.db
 .terraform
 terraform.tfstate*
 kubeconfig
-chart/gitpod/templates/gitpod.yaml
+chart/gitpod-self-hosted/templates/gitpod.yaml
 .envrc
 output.json
 https-certificates.yaml
