@@ -1,3 +1,13 @@
+github:
+  prebuilds:
+    master: true
+    branches: false
+    pullRequests: true
+    pullRequestsFromForks: false
+    addCheck: true
+    addComment: false
+    addBadge: false
+
 image:
   file: .gitpod.Dockerfile
 
