@@ -8,6 +8,10 @@ cert-manager:
 		"$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json cert_manager | jq -cr '.cluster_issuer | @base64')"
 .PHONY: cert-manager
 
+kube-gitpod:
+	@kubectl get pods -n gitpod --sort-by=.metadata.name
+.PHONY: kube-gitpod
+
 install-gitpod:
 	@bash ./install.sh install_gitpod \
 		"$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json gitpod_config | jq -cr '@base64')" \
