@@ -27,6 +27,15 @@ save-kubeconfig:
 	@echo "Kubeconfig saved to ${HOME}/.kube/config"
 .PHONY: save-kubeconfig
 
+tls-backup:
+	@kubectl get secret -n gitpod https-certificates -o yaml > ./https-certificates.yaml
+.PHONY: tls-backup
+
+tls-restore:
+	@kubectl delete secret -n gitpod https-certificates || true
+	@kubectl apply -f ./https-certificates.yaml
+.PHONY: tls-restore
+
 ###
 # Providers
 ###
