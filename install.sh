@@ -22,6 +22,7 @@ GITPOD_IMAGE_SOURCE="${GITPOD_IMAGE_SOURCE:-ghcr.io/mrsimonemms/gitpod-self-host
 GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-latest}"
 HELM_TIMEOUT="${HELM_TIMEOUT:-5m}"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
+KUBE_TEMPLATES_DIR="${KUBE_TEMPLATES_DIR:-}" # Optionally add custom templates into the Helm directory
 MONITORING_INSTALL="${MONITORING_INSTALL:-true}"
 MONITORING_NAMESPACE="monitoring"
 NAMESPACE="gitpod"
@@ -170,8 +171,18 @@ install_gitpod() {
   echo "${gitpod_config}" > tmp/generated_config.yaml
   yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
 
-  mkdir -p ${chart_dir}/templates
+  rm -Rf "${chart_dir}/templates"
+  mkdir -p "${chart_dir}/templates"
   cp "$(get_file chart/gitpod-self-hosted/Chart.yaml)" ${chart_dir}/Chart.yaml
+
+  # Allow adding custom Kubernetes resources in the Helm templates
+  if [ -n "${KUBE_TEMPLATES_DIR}" ]; then
+    echo "Copying custom templates - ${KUBE_TEMPLATES_DIR}/*.yml"
+    find "${KUBE_TEMPLATES_DIR}" -type f -name "*.yml" -exec cp {} "${chart_dir}/templates" \;
+
+    echo "Copying custom templates - ${KUBE_TEMPLATES_DIR}/*.yaml"
+    find "${KUBE_TEMPLATES_DIR}" -type f -name "*.yaml" -exec cp {} "${chart_dir}/templates" \;
+  fi
 
   installer validate config -c tmp/gitpod.config.yaml
   installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml
