@@ -20,6 +20,7 @@ CLEANUP_FAILED_UPGRADE="${CLEANUP_FAILED_UPGRADE:-true}"
 DOCKER_PULL="${DOCKER_PULL:-always}"
 GITPOD_IMAGE_SOURCE="${GITPOD_IMAGE_SOURCE:-ghcr.io/mrsimonemms/gitpod-self-hosted/installer}"
 GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-latest}"
+HELM_TIMEOUT="${HELM_TIMEOUT:-5m}"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
 MONITORING_INSTALL="${MONITORING_INSTALL:-true}"
 MONITORING_NAMESPACE="monitoring"
@@ -186,14 +187,7 @@ install_gitpod() {
 
   stop_running_workspaces
 
-  # If certificate secret already exists, set the timeout to 5m
-  cert_secret=$(kubectl get secrets -n "${NAMESPACE}" https-certificates -o jsonpath='{.metadata.name}' || echo '')
-  helm_timeout="5m"
-  if [ "${cert_secret}" = "" ]; then
-    helm_timeout="1h"
-  fi
-
-  echo "Installing Gitpod with Helm with ${helm_timeout} timeout"
+  echo "Installing Gitpod with Helm with ${HELM_TIMEOUT} timeout"
   helm upgrade \
     --atomic="${CLEANUP_FAILED_UPGRADE}" \
     --cleanup-on-fail="${CLEANUP_FAILED_UPGRADE}" \
@@ -201,7 +195,7 @@ install_gitpod() {
     --install \
     --namespace="${NAMESPACE}" \
     --reset-values \
-    --timeout "${helm_timeout}" \
+    --timeout "${HELM_TIMEOUT}" \
     --wait \
     gitpod \
     tmp/chart
