@@ -41,4 +41,10 @@ resource "hcloud_server" "virtual_machine" {
     },
     var.labels
   )
+
+  lifecycle {
+    ignore_changes = [
+      user_data,
+    ]
+  }
 }
