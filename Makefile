@@ -39,7 +39,7 @@ tls-envvar:
 	@rm -Rf ./tmp/cert-list.yaml
 	@touch ./tmp/cert-list.yaml
 	@for cert in $(shell ls ${DEV_CERTS_DIR}); do \
-		echo "$$cert: $$(cat ${DEV_CERTS_DIR}/$$cert | base64 -w0)" >> ./tmp/cert-list.yaml; \
+		echo "$$(echo $$cert | sed -e 's/.yaml//'): $$(cat ${DEV_CERTS_DIR}/$$cert | base64 -w0)" >> ./tmp/cert-list.yaml; \
 	done
 
 	@cat ./tmp/cert-list.yaml | base64 -w0
