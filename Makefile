@@ -1,11 +1,14 @@
+DEV_CERTS_DIR = ./tmp/certs
 EXAMPLES_DIR = ./examples
 
 cert-manager:
+	$(MAKE) tls-list
+
 	@bash ./install.sh cert_manager \
 		"$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -raw domain_name)" \
 		"$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json cert_manager | jq -cr '.secrets | @base64')" \
 		"$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json cert_manager | jq -cr '.cluster_issuer | @base64')"
-.PHONY: cert-manager
+.PHONY: tls-list
 
 kube-gitpod:
 	@kubectl get pods -n gitpod --sort-by=.metadata.name
@@ -29,6 +32,28 @@ save-kubeconfig:
 tls-backup:
 	@kubectl get secret -n gitpod https-certificates -o yaml > ./https-certificates.yaml
 .PHONY: tls-backup
+
+# Take the certs and convert them to the envvar value
+# Designed to be used as "gp env CERTS_LIST=$(make tls-envvar)"
+tls-envvar:
+	@rm -Rf ./tmp/cert-list.yaml
+	@touch ./tmp/cert-list.yaml
+	@for cert in $(shell ls ${DEV_CERTS_DIR}); do \
+		echo "$$cert: $$(cat ${DEV_CERTS_DIR}/$$cert | base64 -w0)" >> ./tmp/cert-list.yaml; \
+	done
+
+	@cat ./tmp/cert-list.yaml | base64 -w0
+.PHONY: tls-envvar
+
+# TLS certs can be stored in CERTS_LIST envvar - this is a convenience for development
+# and not a substitute for a production environment
+tls-list:
+	@echo "Loading certs saved to this workspace"
+
+	@kubectl create namespace gitpod || true
+
+	@kubectl apply -f ${DEV_CERTS_DIR}/$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -raw domain_name).yaml || true
+.PHONY: tls-list
 
 tls-restore:
 	@kubectl delete secret -n gitpod https-certificates || true
