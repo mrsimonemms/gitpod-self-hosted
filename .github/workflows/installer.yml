@@ -63,7 +63,17 @@ jobs:
 
             # Get the tag name
             cat ./output.json
-            INSTALLER_VERSION=$(cat ./output.json | jq -r '.tags[0]')
+
+            # Check that the installer image exists
+            for i in $(jq -rc '.tags[]' < ./output.json); do
+              if ! docker pull "eu.gcr.io/gitpod-core-dev/build/installer:${i}"; then
+                echo "Installer tag doesn't exist ${i} - trying next one"
+              else
+                echo "Installer tag exists - ${i}"
+                INSTALLER_VERSION="${i}"
+                break
+              fi
+            done
           fi
 
           echo "installer_version=${INSTALLER_VERSION}" >> $GITHUB_OUTPUT
