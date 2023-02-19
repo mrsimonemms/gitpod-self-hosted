@@ -69,6 +69,7 @@ Build Gitpod infrastructure in Azure
 | Name | Description |
 |------|-------------|
 | <a name="output_dns_records"></a> [dns\_records](#output\_dns\_records) | n/a |
+| <a name="output_k3s_token"></a> [k3s\_token](#output\_k3s\_token) | Join token for k3s |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | Kubernetes config YAML file |
 | <a name="output_network_security_group_id"></a> [network\_security\_group\_id](#output\_network\_security\_group\_id) | Network security group the virtual machines are located in |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

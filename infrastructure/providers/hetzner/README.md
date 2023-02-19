@@ -79,5 +79,6 @@ Build Gitpod infrastructure in Hetzner
 | Name | Description |
 |------|-------------|
 | <a name="output_dns_records"></a> [dns\_records](#output\_dns\_records) | n/a |
+| <a name="output_k3s_token"></a> [k3s\_token](#output\_k3s\_token) | Join token for k3s |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | Kubernetes config YAML file |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
