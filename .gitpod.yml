@@ -64,6 +64,20 @@ tasks:
     command: |
       gp sync-await setup
 
+      if [ -n "${CERTS_LIST}" ]; then
+        echo "Loading saved TLS certificates"
+        mkdir -p ./tmp/certs
+
+        echo $CERTS_LIST | base64 -d > ./tmp/cert-list.yaml
+
+        for k in $(cat ./tmp/cert-list.yaml | yq 'keys' -o json | jq -cr '.[] | @base64'); do
+          export domain=$(echo $k | base64 -d)
+          yq '.[env(domain)]' ./tmp/cert-list.yaml | base64 -d > ./tmp/certs/${domain}.yaml
+
+          unset domain
+        done
+      fi
+
 vscode:
   extensions:
     - donjayamanne.git-extension-pack
