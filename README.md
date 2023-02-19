@@ -24,6 +24,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
     * [`kubeconfig`](#kubeconfig)
   * [Example Gitpod Module - Hetzner](#example-gitpod-module---hetzner)
 * [Versioning](#versioning)
+* [Contributing](#contributing)
 * [Roadmap](#roadmap)
 * [Support](#support)
 * [Referral Links](#referral-links)
@@ -379,6 +380,10 @@ in a semver-like format `YYYY.MM.<patch>`. It is recommended you use this.
 
 To define your version, set the `GITPOD_INSTALLER_VERSION` environment variable.
 If unset, it will be `latest`.
+
+## Contributing
+
+Please see the [contributing guide](CONTRIBUTING.md) for more details.
 
 ## Roadmap
 
