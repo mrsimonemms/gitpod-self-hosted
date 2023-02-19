@@ -101,9 +101,7 @@ hetzner-apply:
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		apply
 
-	PROVIDER=hetzner $(MAKE) save-kubeconfig
-	@bash ./csi.sh hetzner
-	PROVIDER=hetzner $(MAKE) cert-manager install-gitpod
+	PROVIDER=hetzner $(MAKE) save-kubeconfig cert-manager install-gitpod
 .PHONY: hetzner-apply
 
 hetzner-destroy:
