@@ -46,7 +46,7 @@ locals {
         nodes = [
           {
             auto_scale = false // @todo(sje): work out how to autoscale
-            count      = lookup(var.size_data, "node_count", 3)
+            count      = var.size_data.node_count
             labels = {
               lookup(module.common.node_labels, "workload_meta")      = true
               lookup(module.common.node_labels, "workload_ide")       = true
