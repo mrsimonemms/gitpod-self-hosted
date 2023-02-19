@@ -86,3 +86,4 @@ vscode:
     - HashiCorp.terraform
     - HashiCorp.HCL
     - timonwong.shellcheck
+    - waderyan.gitblame
