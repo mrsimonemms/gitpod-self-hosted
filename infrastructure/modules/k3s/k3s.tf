@@ -1,8 +1,8 @@
 resource "ssh_resource" "install_primary_manager" {
-  host         = local.primary_manager.node.public_ip
-  user         = local.primary_manager.node.username
-  private_key  = local.primary_manager.private_key
-  port         = 2244
+  host        = local.primary_manager.node.public_ip
+  user        = local.primary_manager.node.username
+  private_key = local.primary_manager.private_key
+  port        = 2244
 
   commands = compact([
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
@@ -69,10 +69,10 @@ resource "ssh_resource" "install_additional_managers" {
     ssh_resource.install_primary_manager
   ]
 
-  host         = local.additional_managers[count.index].node.public_ip
-  user         = local.additional_managers[count.index].node.username
-  private_key  = local.additional_managers[count.index].private_key
-  port         = 2244
+  host        = local.additional_managers[count.index].node.public_ip
+  user        = local.additional_managers[count.index].node.username
+  private_key = local.additional_managers[count.index].private_key
+  port        = 2244
 
   bastion_host = lookup(local.additional_managers[count.index], "bastion_host", null)
   bastion_port = lookup(local.additional_managers[count.index], "bastion_port", null)

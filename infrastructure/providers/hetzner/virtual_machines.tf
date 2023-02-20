@@ -75,7 +75,7 @@ module "k3s_nodes" {
 }
 
 module "k3s_setup" {
-  source = "../../modules/k3s"
+  source                = "../../modules/k3s"
   kubecontext           = var.kubecontext
   load_balancer_address = local.deployment[var.size].machines.manager.count == 1 ? null : hcloud_load_balancer.k3s_managers.0.ipv4
   managers = [for node in module.k3s_manager.nodes : {
