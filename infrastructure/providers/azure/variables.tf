@@ -3,6 +3,11 @@ variable "domain_name" {
   type        = string
 }
 
+variable "kubecontext" {
+  description = "Kubecontext name to use"
+  default     = "gitpod-self-hosted"
+}
+
 variable "location" {
   description = "Data centre location - run `az account list-locations -o table` for all available options"
   type        = string

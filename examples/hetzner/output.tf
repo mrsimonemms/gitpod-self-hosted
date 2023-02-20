@@ -53,3 +53,8 @@ output "kubeconfig" {
   value       = module.hetzner.kubeconfig
   sensitive   = true
 }
+
+output "kubecontext" {
+  description = "Kubecontext name to use"
+  value       = module.hetzner.kubecontext
+}

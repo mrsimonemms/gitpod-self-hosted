@@ -23,8 +23,15 @@ install-gitpod:
 save-kubeconfig:
 	@mkdir -p ${HOME}/.kube
 
-	@cd ${EXAMPLES_DIR}/${PROVIDER} && terraform output -json kubeconfig | jq -r > ${HOME}/.kube/config
+	@terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json kubeconfig | jq -r > ${HOME}/.kube/config.gsh
+	@KUBECONFIG="${HOME}/.kube/config:${HOME}/.kube/config.gsh" kubectl config view --flatten > ${HOME}/.kube/config.tmp
+
+	@mv ${HOME}/.kube/config.tmp ${HOME}/.kube/config
+	@rm -f ${HOME}/.kube/config.gsh
+
 	@chmod 600 ${HOME}/.kube/config
+
+	@kubectl config use-context "$(shell terraform -chdir=${EXAMPLES_DIR}/${PROVIDER} output -json kubecontext | jq -r)"
 
 	@echo "Kubeconfig saved to ${HOME}/.kube/config"
 .PHONY: save-kubeconfig
@@ -101,9 +108,7 @@ hetzner-apply:
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		apply
 
-	PROVIDER=hetzner $(MAKE) save-kubeconfig
-	@bash ./csi.sh hetzner
-	PROVIDER=hetzner $(MAKE) cert-manager install-gitpod
+	PROVIDER=hetzner $(MAKE) save-kubeconfig cert-manager install-gitpod
 .PHONY: hetzner-apply
 
 hetzner-destroy:

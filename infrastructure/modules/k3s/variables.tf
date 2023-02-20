@@ -1,3 +1,8 @@
+variable "kubecontext" {
+  type    = string
+  default = "gitpod-self-hosted"
+}
+
 variable "load_balancer_address" {
   type    = string
   default = null

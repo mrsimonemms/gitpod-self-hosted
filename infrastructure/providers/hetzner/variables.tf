@@ -3,6 +3,11 @@ variable "domain_name" {
   type        = string
 }
 
+variable "kubecontext" {
+  description = "Kubecontext name to use"
+  default     = "gitpod-self-hosted"
+}
+
 variable "location" {
   description = "Data centre location - see https://docs.hetzner.com/cloud/general/locations for all available options"
   type        = string
@@ -22,11 +27,9 @@ variable "size" {
 variable "size_data" {
   description = "Additional data for deployment size - this will be ignored if using an invalid 'size'"
   type = object({
-    node_count = number
+    node_count = optional(number, 3)
   })
-  default = {
-    node_count = 3
-  }
+  default = {}
 }
 
 variable "ssh_public_key_path" {
