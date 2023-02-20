@@ -53,6 +53,7 @@ cert_manager() {
   domain_name="${1}"
   secrets="${2}"
   cluster_issuer="${3}"
+  install_deps="${4}"
 
   helm upgrade \
     --atomic \
@@ -67,6 +68,14 @@ cert_manager() {
     --version ^1.11.0 \
     --wait \
     cert-manager cert-manager
+
+  if [ -n "${install_deps}" ]; then
+    echo "Executing cert-manager dependencies: ${install_deps}"
+
+    $install_deps
+
+    echo "Successfully executed ${install_deps}"
+  fi
 
   echo "Creating secrets for the ClusterIssuer"
 
@@ -268,7 +277,7 @@ stop_running_workspaces() {
 
 case "${cmd}" in
   cert_manager )
-    cert_manager "${DOMAIN_NAME:-$2}" "$(echo "${SECRETS:-$3}" | base64 -d)" "$(echo "${CLUSTER_ISSUER:-$4}" | base64 -d)"
+    cert_manager "${DOMAIN_NAME:-$2}" "$(echo "${SECRETS:-$3}" | base64 -d)" "$(echo "${CLUSTER_ISSUER:-$4}" | base64 -d)" "${WEBHOOKS_SCRIPT:-$5}"
     ;;
   install_gitpod )
     install_gitpod "$(echo "${GITPOD_CONFIG:-$2}" | base64 -d)" "$(echo "${GITPOD_SECRETS:-$3}" | base64 -d)"

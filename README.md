@@ -17,6 +17,7 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
     * [Container Storage Interface (optional)](#container-storage-interface-optional)
       * [A Word On The Container Registry](#a-word-on-the-container-registry)
     * [Cert-Manager](#cert-manager)
+      * [DNS01 Webhooks](#dns01-webhooks)
     * [Install Gitpod](#install-gitpod)
     * [Monitoring](#monitoring)
   * [Outputs](#outputs)
@@ -225,6 +226,44 @@ curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main
   CLUSTER_ISSUER="$(terraform output -json cert_manager | jq -cr '.cluster_issuer | @base64')" \
   bash -
 ```
+
+##### DNS01 Webhooks
+
+If you want to use the [DNS01 webhook provider](https://cert-manager.io/docs/configuration/acme/dns01/webhook/)
+to generate your TLS certs, you will need to define a script to install any
+additional dependencies required. The script needs to be defined with the environment
+variable `WEBHOOKS_SCRIPT`. This can be any valid command that your terminal
+supports - for readability, it is recommended that you execute a file.
+
+This script is run immediately after cert-manager is installed/upgraded.
+
+Here's a worked example using the [Scaleway](https://github.com/scaleway/cert-manager-webhook-scaleway)
+webhook. The script would be saved to a file called `./install-scaleway-webhook.sh`
+and `WEBHOOKS_SCRIPT` would be set to `bash ./install-scaleway-webhook.sh`.
+
+```shell
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+git clone https://github.com/scaleway/cert-manager-webhook-scaleway.git ~/.cert-manager-webhook-scaleway || true
+
+helm upgrade \
+  --atomic \
+  --cleanup-on-fail \
+  --create-namespace \
+  --install \
+  --namespace="cert-manager" \
+  --reset-values \
+  --set secret.accessKey="$ACCESS_KEY" \
+  --set secret.secretKey="$SECRET_KEY" \
+  --wait \
+  scaleway-webhook \
+  ~/.cert-manager-webhook-scaleway/deploy/scaleway-webhook
+```
+
+This example sets the secret values. If you prefer, these can still be set in
+the `secrets` parameter in the `cert_manager` output from your Terraform scripts.
 
 #### Install Gitpod
 
