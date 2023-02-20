@@ -4,11 +4,6 @@ resource "ssh_resource" "install_primary_manager" {
   private_key  = local.primary_manager.private_key
   port         = 2244
 
-
-  bastion_host = lookup(local.primary_manager, "bastion_host", null)
-  bastion_port = lookup(local.primary_manager, "bastion_port", null)
-  bastion_user = lookup(local.primary_manager, "bastion_user", null)
-
   commands = compact([
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
@@ -17,6 +12,10 @@ resource "ssh_resource" "install_primary_manager" {
     # Disable scheduling to the node if multiple managers
     length(local.additional_managers) == 0 ? "" : "sudo kubectl taint nodes --overwrite $(hostname) app=gitpod-sh:NoSchedule",
   ])
+}
+
+locals {
+  k3s_kubeconfig = "/etc/rancher/k3s/k3s.yaml"
 }
 
 // Only run on first manager node
@@ -37,8 +36,13 @@ resource "ssh_sensitive_resource" "kubeconfig" {
   bastion_user = local.primary_manager.bastion_user
   port         = 2244
 
+  # Inspired by k3sup
+  # @link https://github.com/alexellis/k3sup/blob/92c9c3a1ed17c6dc60327dc173dd9262894be76c/cmd/install.go#L564
   commands = [
-    "sudo sed \"s/127.0.0.1/${local.k3s_server_address_public}/g\" /etc/rancher/k3s/k3s.yaml"
+    "sudo sed -i \"s/127.0.0.1/${local.k3s_server_address_public}/g\" ${local.k3s_kubeconfig}",
+    "sudo sed -i \"s/localhost/${local.k3s_server_address_public}/g\" ${local.k3s_kubeconfig}",
+    "sudo sed -i \"s/default/${var.kubecontext}/g\" ${local.k3s_kubeconfig}",
+    "sudo cat ${local.k3s_kubeconfig}",
   ]
 }
 
@@ -48,14 +52,10 @@ resource "ssh_sensitive_resource" "k3s_token" {
     ssh_resource.install_primary_manager
   ]
 
-  host         = local.k3s_server_address_public
-  user         = local.primary_manager.node.username
-  private_key  = local.primary_manager.private_key
-  port         = 2244
-
-  bastion_host = lookup(local.primary_manager, "bastion_host", null)
-  bastion_port = lookup(local.primary_manager, "bastion_port", null)
-  bastion_user = lookup(local.primary_manager, "bastion_user", null)
+  host        = local.k3s_server_address_public
+  user        = local.primary_manager.node.username
+  private_key = local.primary_manager.private_key
+  port        = 2244
 
   commands = [
     "sudo cat /var/lib/rancher/k3s/server/node-token"

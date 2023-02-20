@@ -101,3 +101,9 @@ output "kubeconfig" {
   value       = module.azure.kubeconfig
   sensitive   = true
 }
+
+
+output "kubecontext" {
+  description = "Kubecontext name to use"
+  value       = module.azure.kubecontext
+}

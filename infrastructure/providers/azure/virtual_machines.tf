@@ -42,6 +42,7 @@ module "k3s_nodes" {
 module "k3s_setup" {
   source = "../../modules/k3s"
 
+  kubecontext = var.kubecontext
   managers = [for node in module.k3s_manager.nodes : {
     node        = node
     labels      = local.deployment[var.size].machines.manager.labels

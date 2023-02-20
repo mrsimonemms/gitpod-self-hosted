@@ -37,6 +37,7 @@ module "azure" {
   source = "../../infrastructure/providers/azure"
 
   domain_name          = var.domain_name
+  kubecontext          = "gitpod-sh-azure"
   location             = azurerm_resource_group.gitpod.location
   size                 = var.size
   ssh_private_key_path = var.ssh_private_key_path

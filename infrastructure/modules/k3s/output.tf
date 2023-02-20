@@ -11,3 +11,7 @@ output "kubeconfig" {
   value     = ssh_sensitive_resource.kubeconfig.result
   sensitive = true
 }
+
+output "kubecontext" {
+  value = var.kubecontext
+}
