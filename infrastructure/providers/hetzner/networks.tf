@@ -18,12 +18,12 @@ resource "hcloud_firewall" "firewall" {
   name = format(module.common.name_format, local.location, "firewall")
 
   dynamic "rule" {
-    for_each = toset(local.firewall)
+    for_each = toset(module.k3s_setup.firewall_ports)
     content {
-      description = rule.value.description
-      port        = rule.value.port
+      description = rule.value.name
+      port        = rule.value.start == rule.value.end ? rule.value.start : "${rule.value.start}-${rule.value.end}"
       direction   = try(rule.value.direction, "in")
-      protocol    = try(rule.value.protocol, "tcp")
+      protocol    = try(lower(rule.value.protocol), "tcp")
       source_ips = try(rule.value.source_ips, [
         "0.0.0.0/0",
         "::/0"

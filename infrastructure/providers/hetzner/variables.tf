@@ -15,7 +15,17 @@ variable "size" {
   default     = "small"
   validation {
     error_message = "Value must be small, medium or large"
-    condition     = contains(["small"], var.size) // @todo(sje): support medium and large
+    condition     = contains(["small", "medium"], var.size) // @todo(sje): support large
+  }
+}
+
+variable "size_data" {
+  description = "Additional data for deployment size - this will be ignored if using an invalid 'size'"
+  type = object({
+    node_count = number
+  })
+  default = {
+    node_count = 3
   }
 }
 
