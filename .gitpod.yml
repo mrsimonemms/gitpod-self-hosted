@@ -1,26 +1,44 @@
+github:
+  prebuilds:
+    master: true
+    branches: false
+    pullRequests: true
+    pullRequestsFromForks: false
+    addCheck: true
+    addComment: false
+    addBadge: false
+
 image:
   file: .gitpod.Dockerfile
 
 tasks:
   - name: Setup
     before: |
-      curl -sfL gpm.simonemms.com | bash
-
-      gpm install helm kubectl pre-commit tfenv yq
-
-      mkdir -p $HOME/.kube
-
-      # Install latest terraform
-      tfenv install
-      tfenv use
-
-      go install github.com/terraform-docs/terraform-docs@latest
-
       gp sync-done setup
 
       pre-commit install --install-hooks -t pre-commit -t commit-msg
 
       gp sync-done pre-commit
+
+      exit 0
+  - name: Azure
+    command: |
+      gp sync-await setup
+
+      if [ -n "${ARM_CLIENT_ID}" ] && [ -n "${ARM_CLIENT_SECRET}" ] && [ -n "${ARM_SUBSCRIPTION_ID}" ] && [ -n "${ARM_TENANT_ID}" ]; then
+        echo "Initializing Azure"
+        az login --service-principal \
+          --username "${ARM_CLIENT_ID}" \
+          --password "${ARM_CLIENT_SECRET}" \
+          --tenant "${ARM_TENANT_ID}"
+
+        echo "Download Azure MySQL SSL CA certificate"
+        curl -fsSL https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -o examples/azure/mysql-ssl.crt.pem
+
+        if [ -n "${TF_STATE_AZURE_RESOURCE_GROUP}" ] && [ -n "${TF_STATE_AZURE_ACCOUNT_NAME}" ] && [ -n "${TF_STATE_AZURE_CONTAINER_NAME}" ] && [ -n "${TF_STATE_AZURE_KEY}" ]; then
+          make azure-init
+        fi
+      fi
 
       exit 0
   - name: Hetzner
@@ -46,6 +64,20 @@ tasks:
     command: |
       gp sync-await setup
 
+      if [ -n "${CERTS_LIST}" ]; then
+        echo "Loading saved TLS certificates"
+        mkdir -p ./tmp/certs
+
+        echo $CERTS_LIST | base64 -d > ./tmp/cert-list.yaml
+
+        for k in $(cat ./tmp/cert-list.yaml | yq 'keys' -o json | jq -cr '.[] | @base64'); do
+          export domain=$(echo $k | base64 -d)
+          yq '.[env(domain)]' ./tmp/cert-list.yaml | base64 -d > ./tmp/certs/${domain}.yaml
+
+          unset domain
+        done
+      fi
+
 vscode:
   extensions:
     - donjayamanne.git-extension-pack
@@ -54,3 +86,4 @@ vscode:
     - HashiCorp.terraform
     - HashiCorp.HCL
     - timonwong.shellcheck
+    - waderyan.gitblame

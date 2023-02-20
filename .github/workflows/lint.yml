@@ -44,7 +44,7 @@ jobs:
         run: terraform fmt -recursive -check
 
       - name: Terraform init
-        run: terraform -chdir=${{ matrix.dir }} init
+        run: terraform -chdir=${{ matrix.dir }} init -upgrade
 
       - name: Terraform validate
         run: terraform -chdir=${{ matrix.dir }} validate

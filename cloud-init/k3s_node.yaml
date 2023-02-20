@@ -15,7 +15,7 @@ packages:
   - linux-headers-generic
   - make
   - runc
-runcmd:
+bootcmd:
 # Change SSH port
   - |
     if grep -q "^Port 22$" /etc/ssh/sshd_config; then
@@ -24,11 +24,11 @@ runcmd:
       echo "Port 2244" >> /etc/ssh/sshd_config
     fi
   - service ssh restart
+runcmd:
 # Install ShiftFS - 5.16 works with Ubuntu 20.04
   - [ git, clone, -b, k5.16, "https://github.com/toby63/shiftfs-dkms.git", /shiftfs-k516 ]
   - [ make, -f, /shiftfs-k516/Makefile.dkms, -C, /shiftfs-k516 ]
   - [ modinfo, shiftfs ]
 # Install k3s and join as node
-  - export K3S_NODE_NAME="gitpod-node-$(echo $RANDOM | md5sum | head -c 5;)"
   - "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"%{ for key, value in labels ~} --node-label=${key}=${value} %{ endfor ~}\" K3S_URL=\"https://${server_address}:6443\" K3S_TOKEN=\"${join_token}\" sh -"
 timezone: UTC

@@ -1,0 +1,4 @@
+customCACert:
+  kind: secret
+  name: gitpod-ci-selfsigned
+domain: ${DOMAIN}

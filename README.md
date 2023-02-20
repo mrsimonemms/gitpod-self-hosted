@@ -1,4 +1,4 @@
-# Gitpod Self-Hosted
+# Gitpod Self-Hosted Instructions
 
 Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 
@@ -6,11 +6,13 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 
 * [About](#about)
 * [Infrastructure](#infrastructure)
+* [Cluster Sizes](#cluster-sizes)
 * [Supported Cloud Providers](#supported-cloud-providers)
 * [Getting Started](#getting-started)
   * [Create Your Terraform](#create-your-terraform)
   * [Next Steps](#next-steps)
     * [Container Storage Interface (optional)](#container-storage-interface-optional)
+      * [A Word On The Container Registry](#a-word-on-the-container-registry)
     * [Cert-Manager](#cert-manager)
     * [Install Gitpod](#install-gitpod)
     * [Monitoring](#monitoring)
@@ -22,12 +24,19 @@ Resources for managing your own [Gitpod](https://www.gitpod.io) installation
     * [`kubeconfig`](#kubeconfig)
   * [Example Gitpod Module - Hetzner](#example-gitpod-module---hetzner)
 * [Versioning](#versioning)
+* [Contributing](#contributing)
 * [Roadmap](#roadmap)
 * [Support](#support)
+* [Referral Links](#referral-links)
 
 <!-- Regenerate with "pre-commit run -a markdown-toc" -->
 
 <!-- tocstop -->
+
+This is a community-maintained project containing instructions on how to run
+Gitpod in your own infrastructure. This is original work, not a fork of Gitpod
+and is not affialiated to Gitpod in any way. Gitpod is licenced under [AGPL-3.0](https://github.com/gitpod-io/gitpod/blob/main/LICENSE.md)
+and all Gitpod components are used under that licence.
 
 ## About
 
@@ -49,10 +58,12 @@ have. This project will have an intentionally limited number of things that you 
 configure so that your installation works reliably.
 
 In fact, by design this project will only allow you to configure five things:
+
 1. The cloud you run it on
 1. The domain name it's run on
 1. The location it runs in
 1. The size of the installation - `small` (for PoCs), `medium` and `large`
+(see [Cluster Sizes](#cluster-sizes))
 1. The SSH key used to access the virtual machines
 
 A more detailed explanation and reasoning on why I'm still passionate about Gitpod
@@ -76,9 +87,32 @@ by using k3s-only.
 any effort for self-improvement, Gitpod is not the project to do it on. I won't be
 providing any general Kubernetes support in this repository.
 
+## Cluster Sizes
+
+There is a standard approach provided for the size of clusters. As this project is
+designed to be railways tracks for installing Gitpod, the cluster size is the main
+method of configuration. Any user-defined data is configured in the `size_data`
+variable - there is limited validation on this parameter and will be ignored if
+an unsupported `size` is usedl
+
+| Name | Purpose | Manager Highly-Available | Manager Nodes | Worker Nodes | Worker Clusters |
+| --- | --- | --- | --- | --- | --- |
+| `small` | PoCs and personal developer environments | No | 1 x 4vCPU, 16GB RAM | 1 x 4vCPU, 16GB RAM | 1 |
+| `medium` | Small development teams | Yes | 3 x [smallest usable machine](https://docs.k3s.io/installation/requirements#large-clusters) | 3-100 x 4vCPU, 16GB RAM | 1 |
+| `large` | Large development teams | Yes | 3 x user-defined | Auto-scaled, user-defined  | User-defined |
+
+The `large` cluster may not be supported in all cloud providers. This is dependent
+upon the cloud provider having some form of auto-scaling ability for virtual machines.
+
+In future, there may be support for `extra-large` clusters with support for a multi-region
+installation for international development teams.
+
 ## Supported Cloud Providers
 
-* [Hetzner](https://www.hetzner.com/cloud)
+| Provider | Supported Sizes | Notes |
+| --- | --- | --- |
+| [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p) | small, medium | |
+| [Microsoft Azure](https://https://azure.microsoft.com) | small | <ul><li>Requires 2 x 4CPU, 16GB VMs - this is above the free trial quota so will need a paid Azure account</li><li>Azure Storage is not S3-compatible, [so does not work with Gitpod storage](https://github.com/gitpod-io/gitpod/pull/16081)</li><li>Further work will require access to a paid Azure account</li></ul> |
 
 ## Getting Started
 
@@ -107,13 +141,21 @@ your k3s instance and install Gitpod.
 
 #### Container Storage Interface (optional)
 
-A CSI driver is used to configure how the Kubernetes cluster saves persistent
-data. k3s uses `local-path` storage by default, which saves the data to the
-node. That's fine, but not necessarily performant and, if the node is evicted,
-the data is lost.
+> This is an optional step and only recommended if you are going to use the in-cluster
+> database or object storage services. Gitpod creates no other persistent volume
+> claims.
+>
+> In-cluster services are provided as a convenience. These can be difficult to
+> scale and backup, so should only be used if there is no alternative.
 
-For each of the providers, a CSI driver is given to save data to the cloud's
-volume implementation.
+A [Container Storage Interface (CSI)](https://kubernetes-csi.github.io) driver
+is used to configure how the Kubernetes cluster saves persistent data. k3s uses
+`local-path` storage by default, which saves the data to the node. That's fine,
+but is not necessarily performant and, if the node is evicted, the data is lost.
+
+Where possible, a CSI driver is given to save data to the cloud's volume
+implementation. They may not exist for every provider, especially if the provider
+maintains a managed database and storage option.
 
 Here's how to install the Hetzner CSI. Notice the `HCLOUD_TOKEN`, which is
 required to manage volumes.
@@ -125,7 +167,15 @@ curl -sfSL https://raw.githubusercontent.com/mrsimonemms/gitpod-self-hosted/main
   bash -
 ```
 
-This is an optional step, but strongly recommended.
+##### A Word On The Container Registry
+
+The container registry is not a critical part of the system. It stores no data
+aside from images generated for a workspace. If the workspace no longer exists,
+it will be rebuilt.
+
+There is no reason to put effort into backing up the container registry because
+the resources will be rebuilt to the desired state. The reason the container
+registry exists is to avoid having to build workspace images needlessly.
 
 #### Cert-Manager
 
@@ -271,8 +321,7 @@ Like the [`cert_manager`](#cert_manager) output, these will have the secret
 name as the top-level key and then any secrets as key/value pairs.
 
 This example is how one might define the `database` secret for an Azure
-MySQL database - this is based upon [an old project](https://github.com/mrsimonemms/gitpod-self-hosted-infrastructure/blob/main/infrastructure/azure/output.tf#L24)
-as Azure is not yet supported by this project.
+MySQL database.
 
 ```terraform
 output "gitpod_secrets" {
@@ -280,10 +329,10 @@ output "gitpod_secrets" {
     database = {
       # If unsure, use this key
       encryptionKeys = "[{\"name\":\"general\",\"version\":1,\"primary\":true,\"material\":\"4uGh1q8y2DYryJwrVMHs0kWXJlqvHWWt/KJuNi04edI=\"}]"
-      host           = "${azurerm_mysql_server.db.0.name}.mysql.database.azure.com"
-      password       = azurerm_mysql_server.db.0.administrator_login_password
+      host           = "${azurerm_mysql_server.db.name}.mysql.database.azure.com"
+      password       = azurerm_mysql_server.db.administrator_login_password
       port           = 3306
-      username       = "${azurerm_mysql_server.db.0.administrator_login}@${azurerm_mysql_server.db.0.name}"
+      username       = "${azurerm_mysql_server.db.administrator_login}@${azurerm_mysql_server.db.name}"
     }
   }
   sensitive = true
@@ -323,28 +372,34 @@ there was an RFC about switching from Werft to GitHub Actions. Watch this space 
 more information.
 
 This project maintains two tagged versions of the Installer:
-- `nightly`: a daily version, generated from the most recent version at midnight
+
+* `nightly`: a daily version, generated from the most recent version at midnight
 UTC. This is also tagged with a date tag, in format `YYYY-MM-DD`.
-- `latest`: a monthly supported version. This is also tagged with a version tag,
+* `latest`: a monthly supported version. This is also tagged with a version tag,
 in a semver-like format `YYYY.MM.<patch>`. It is recommended you use this.
 
 To define your version, set the `GITPOD_INSTALLER_VERSION` environment variable.
 If unset, it will be `latest`.
 
+## Contributing
+
+Please see the [contributing guide](CONTRIBUTING.md) for more details.
+
 ## Roadmap
 
 The roadmap will largely depend upon the community response to this repository. Ideally,
 I would like to see support for:
-- Amazon Web Services
-- Civo Cloud
-- DigitalOcean
-- Google Cloud Platform
-- Microsoft Azure
 
-Work on these platform will cost money to get resources spun up. If you want me to
-work on these for your own Gitpod installation, I will only be able to do so if you
-can provide me an account to cover the cost of creating these resources for testing
-purposes.
+* Amazon Web Services
+* Civo Cloud
+* DigitalOcean
+* Google Cloud Platform
+* Scaleway
+
+Work on these platforms will cost money to get resources spun up. If you want me
+to work on these for your own Gitpod installation, I will only be able to do so
+if you can provide me an account to cover the cost of creating these resources
+for testing purposes.
 
 I'm happy to receive pull requests for these platforms from contributors. As above,
 I will need to be able to test these before they're merged to `main` - pull requests
@@ -357,3 +412,10 @@ Please [contact me](https://www.simonemms.com/contact) to discuss further.
 
 I'm happy to discuss options for commercial support contracts. Please
 [contact me](https://www.simonemms.com/contact) to discuss further.
+
+## Referral Links
+
+Using these links will help support the project and provide you with additional
+credits for the cloud provider.
+
+* [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p)

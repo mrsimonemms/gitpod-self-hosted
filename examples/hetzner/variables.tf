@@ -7,17 +7,13 @@ variable "domain_name" {
 variable "location" {
   description = "Data centre location - this is dependent upon your provider"
   type        = string
+  default     = "nbg1"
 }
 
 variable "size" {
   description = "Deployment size"
   type        = string
   default     = "small"
-
-  validation {
-    error_message = "Value must be small, medium or large"
-    condition     = contains(["small"], var.size) // @todo(sje): support medium and large
-  }
 }
 
 variable "ssh_public_key_path" {

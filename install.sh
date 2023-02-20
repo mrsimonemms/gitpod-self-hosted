@@ -16,14 +16,19 @@ fi
 
 mkdir -p ./tmp
 
+CLEANUP_FAILED_UPGRADE="${CLEANUP_FAILED_UPGRADE:-true}"
+DOCKER_PULL="${DOCKER_PULL:-always}"
 GITPOD_IMAGE_SOURCE="${GITPOD_IMAGE_SOURCE:-ghcr.io/mrsimonemms/gitpod-self-hosted/installer}"
 GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-latest}"
+HELM_TIMEOUT="${HELM_TIMEOUT:-5m}"
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
+KUBE_TEMPLATES_DIR="${KUBE_TEMPLATES_DIR:-}" # Optionally add custom templates into the Helm directory
 MONITORING_INSTALL="${MONITORING_INSTALL:-true}"
 MONITORING_NAMESPACE="monitoring"
 NAMESPACE="gitpod"
-SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
 REPO_RAW_URL="${REPO_RAW_URL:-https://raw.githubusercontent.com/MrSimonEmms/gitpod-self-hosted/main}"
+SSH_HOST_KEY_SECRET="ssh-gateway-host-key"
+TLS_CERT_ISSUE_TIMEOUT="${TLS_CERT_ISSUE_TIMEOUT:-15m}"
 
 # Create the Gitpod namespace
 kubectl create namespace "${NAMESPACE}" || true
@@ -77,6 +82,14 @@ cert_manager() {
   yq e \
     ".spec.dnsNames=[\"${domain_name}\", \"*.${domain_name}\", \"*.ws.${domain_name}\"]" \
     "$(get_file kubernetes/tls-certificate.yaml)" | kubectl apply -f -
+
+  echo "Waiting ${TLS_CERT_ISSUE_TIMEOUT} for Gitpod TLS certificate to be issued..."
+  kubectl wait \
+    --for=condition=ready \
+    -n gitpod \
+    --timeout="${TLS_CERT_ISSUE_TIMEOUT}" \
+    certificate \
+    https-certificates
 }
 
 create_kube_secrets() {
@@ -128,7 +141,7 @@ installer() {
     -v="${KUBECONFIG}:/root/.kube/config" \
     -v="${PWD}:${PWD}" \
     -w="${PWD}" \
-    --pull=always \
+    --pull="${DOCKER_PULL}" \
     --entrypoint="${ENTRYPOINT:-/app/installer}" \
     "${GITPOD_IMAGE_SOURCE}:${GITPOD_INSTALLER_VERSION}" \
     "${@}"
@@ -158,12 +171,21 @@ install_gitpod() {
   echo "${gitpod_config}" > tmp/generated_config.yaml
   yq -P '. *= load("tmp/generated_config.yaml")' "$(get_file kubernetes/gitpod.config.yaml)" > tmp/gitpod.config.yaml
 
-  mkdir -p ${chart_dir}/templates
-  cp "$(get_file chart/gitpod/Chart.yaml)" ${chart_dir}/Chart.yaml
+  rm -Rf "${chart_dir}/templates"
+  mkdir -p "${chart_dir}/templates"
+  cp "$(get_file chart/gitpod-self-hosted/Chart.yaml)" ${chart_dir}/Chart.yaml
+
+  # Allow adding custom Kubernetes resources in the Helm templates
+  if [ -n "${KUBE_TEMPLATES_DIR}" ]; then
+    echo "Copying custom templates - ${KUBE_TEMPLATES_DIR}/*.yml"
+    find "${KUBE_TEMPLATES_DIR}" -type f -name "*.yml" -exec cp {} "${chart_dir}/templates" \;
+
+    echo "Copying custom templates - ${KUBE_TEMPLATES_DIR}/*.yaml"
+    find "${KUBE_TEMPLATES_DIR}" -type f -name "*.yaml" -exec cp {} "${chart_dir}/templates" \;
+  fi
 
   installer validate config -c tmp/gitpod.config.yaml
-  # Cluster validation allowed to fail as http-certifcates might not be present - kubeconfig is path inside container
-  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml || true
+  installer validate cluster -n "${NAMESPACE}" --kubeconfig="${HOME}/.kube/config" -c tmp/gitpod.config.yaml
   installer render -n "${NAMESPACE}" -c tmp/gitpod.config.yaml > "${chart_dir}/templates/gitpod.yaml"
 
   post_process "${chart_dir}/templates/gitpod.yaml"
@@ -176,22 +198,15 @@ install_gitpod() {
 
   stop_running_workspaces
 
-  # If certificate secret already exists, set the timeout to 5m
-  cert_secret=$(kubectl get secrets -n "${NAMESPACE}" https-certificates -o jsonpath='{.metadata.name}' || echo '')
-  helm_timeout="5m"
-  if [ "${cert_secret}" = "" ]; then
-    helm_timeout="1h"
-  fi
-
-  echo "Installing Gitpod with Helm with ${helm_timeout} timeout"
+  echo "Installing Gitpod with Helm with ${HELM_TIMEOUT} timeout"
   helm upgrade \
-    --atomic \
-    --cleanup-on-fail \
+    --atomic="${CLEANUP_FAILED_UPGRADE}" \
+    --cleanup-on-fail="${CLEANUP_FAILED_UPGRADE}" \
     --create-namespace \
     --install \
     --namespace="${NAMESPACE}" \
     --reset-values \
-    --timeout "${helm_timeout}" \
+    --timeout "${HELM_TIMEOUT}" \
     --wait \
     gitpod \
     tmp/chart
