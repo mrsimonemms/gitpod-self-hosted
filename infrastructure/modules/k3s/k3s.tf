@@ -14,6 +14,10 @@ resource "ssh_resource" "install_primary_manager" {
   ])
 }
 
+locals {
+  k3s_kubeconfig = "/etc/rancher/k3s/k3s.yaml"
+}
+
 // Only run on first manager node
 resource "ssh_sensitive_resource" "kubeconfig" {
   depends_on = [
@@ -29,8 +33,13 @@ resource "ssh_sensitive_resource" "kubeconfig" {
   private_key = local.primary_manager.private_key
   port        = 2244
 
+  # Inspired by k3sup
+  # @link https://github.com/alexellis/k3sup/blob/92c9c3a1ed17c6dc60327dc173dd9262894be76c/cmd/install.go#L564
   commands = [
-    "sudo sed \"s/127.0.0.1/${local.k3s_server_address_public}/g\" /etc/rancher/k3s/k3s.yaml"
+    "sudo sed -i \"s/127.0.0.1/${local.k3s_server_address_public}/g\" ${local.k3s_kubeconfig}",
+    "sudo sed -i \"s/localhost/${local.k3s_server_address_public}/g\" ${local.k3s_kubeconfig}",
+    "sudo sed -i \"s/default/${var.kubecontext}/g\" ${local.k3s_kubeconfig}",
+    "sudo cat ${local.k3s_kubeconfig}",
   ]
 }
 

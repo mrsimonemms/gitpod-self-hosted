@@ -32,3 +32,8 @@ output "kubeconfig" {
   value       = module.k3s_setup.kubeconfig
   sensitive   = true
 }
+
+output "kubecontext" {
+  description = "Kubecontext name to use"
+  value       = module.k3s_setup.kubecontext
+}

@@ -33,6 +33,11 @@ output "kubeconfig" {
   sensitive   = true
 }
 
+output "kubecontext" {
+  description = "Kubecontext name to use"
+  value       = module.k3s_setup.kubecontext
+}
+
 output "network_security_group_id" {
   description = "Network security group the virtual machines are located in"
   value       = azurerm_network_security_group.network.id

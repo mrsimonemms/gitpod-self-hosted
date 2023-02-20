@@ -14,6 +14,7 @@ module "hetzner" {
   source = "../../infrastructure/providers/hetzner"
 
   domain_name          = var.domain_name
+  kubecontext          = "gitpod-sh-hetzner"
   location             = var.location
   size                 = var.size
   ssh_private_key_path = var.ssh_private_key_path

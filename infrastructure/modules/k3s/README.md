@@ -32,6 +32,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_kubecontext"></a> [kubecontext](#input\_kubecontext) | n/a | `string` | `"gitpod-self-hosted"` | no |
 | <a name="input_load_balancer_address"></a> [load\_balancer\_address](#input\_load\_balancer\_address) | n/a | `string` | `null` | no |
 | <a name="input_managers"></a> [managers](#input\_managers) | n/a | <pre>list(object({<br>    node = object({<br>      name       = string<br>      public_ip  = string<br>      private_ip = string<br>      username   = string<br>    })<br>    labels      = map(bool)<br>    private_key = string<br>  }))</pre> | `[]` | no |
 
@@ -42,4 +43,5 @@ No modules.
 | <a name="output_firewall_ports"></a> [firewall\_ports](#output\_firewall\_ports) | n/a |
 | <a name="output_k3s_token"></a> [k3s\_token](#output\_k3s\_token) | n/a |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
+| <a name="output_kubecontext"></a> [kubecontext](#output\_kubecontext) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
