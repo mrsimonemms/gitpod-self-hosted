@@ -8,9 +8,9 @@ output "cert_manager" {
   description = "cert-manager configuration"
   sensitive   = true
   value = {
-    # Secrets required to make AzureDNS work
+    # Secrets required to make Scaleway DNS work
     secrets = {}
-    # AzureDNS configuration
+    # Scaleway DNS configuration
     cluster_issuer = {
       spec = {
         acme = {
@@ -46,10 +46,6 @@ output "gitpod_config" {
     authProviders = [
       {
         kind = "secret"
-        name = "public-github"
-      },
-      {
-        kind = "secret"
         name = "public-gitlab"
       },
     ]
@@ -57,7 +53,7 @@ output "gitpod_config" {
       enabled  = length(var.domain_passlist) > 0
       passlist = var.domain_passlist
     }
-    domain = var.domain_name
+    domain = var.subdomain == null ? "${var.domain_name}" : "${var.subdomain}.${var.domain_name}"
   }
   sensitive = true
 }
