@@ -16,8 +16,11 @@ variable "managers" {
       private_ip = string
       username   = string
     })
-    labels      = map(bool)
-    private_key = string
+    labels       = map(bool)
+    private_key  = string
+    bastion_host = optional(string)
+    bastion_port = optional(string)
+    bastion_user = optional(string)
   }))
   default = []
 

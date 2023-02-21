@@ -57,6 +57,22 @@ tasks:
       fi
 
       exit 0
+  - name: Scaleway
+    command: |
+      gp sync-await setup
+
+      if [ -n "${SCW_ACCESS_KEY}" ] && [ -n "${SCW_SECRET_KEY}" ]; then
+        echo "Initializing Scaleway"
+        if [ -n "${TF_WORKSPACE}" ]; then
+          terraform workspace new ${TF_WORKSPACE}
+        fi
+
+        make scaleway-init
+
+        gp sync-done scaleway-init
+      fi
+
+      exit 0
   - env:
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
     init: |

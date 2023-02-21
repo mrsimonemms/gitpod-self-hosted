@@ -117,6 +117,7 @@ installation for international development teams.
 | --- | --- | --- |
 | [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p) | small, medium | |
 | [Microsoft Azure](https://https://azure.microsoft.com) | small | <ul><li>Requires 2 x 4CPU, 16GB VMs - this is above the free trial quota so will need a paid Azure account</li><li>Azure Storage is not S3-compatible, [so does not work with Gitpod storage](https://github.com/gitpod-io/gitpod/pull/16081)</li><li>Further work will require access to a paid Azure account</li></ul> |
+| [Scaleway](https://www.scaleway.com) | small | |
 
 ### Provider Interfaces
 
