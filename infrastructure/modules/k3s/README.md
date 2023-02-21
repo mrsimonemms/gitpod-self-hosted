@@ -7,13 +7,13 @@ Install k3s
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_ssh"></a> [ssh](#requirement\_ssh) | >=2.3.0, < 3.0.0 |
+| <a name="requirement_ssh"></a> [ssh](#requirement\_ssh) | >=2.6.0, < 3.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_ssh"></a> [ssh](#provider\_ssh) | >=2.3.0, < 3.0.0 |
+| <a name="provider_ssh"></a> [ssh](#provider\_ssh) | >=2.6.0, < 3.0.0 |
 
 ## Modules
 
@@ -32,10 +32,9 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-
 | <a name="input_kubecontext"></a> [kubecontext](#input\_kubecontext) | n/a | `string` | `"gitpod-self-hosted"` | no |
 | <a name="input_load_balancer_address"></a> [load\_balancer\_address](#input\_load\_balancer\_address) | n/a | `string` | `null` | no |
-| <a name="input_managers"></a> [managers](#input\_managers) | n/a | <pre>list(object({<br>    node = object({<br>      name       = string<br>      public_ip  = string<br>      private_ip = string<br>      username   = string<br>    })<br>    labels      = map(bool)<br>    private_key = string<br>  }))</pre> | `[]` | no |
+| <a name="input_managers"></a> [managers](#input\_managers) | n/a | <pre>list(object({<br>    node = object({<br>      name       = string<br>      public_ip  = string<br>      private_ip = string<br>      username   = string<br>    })<br>    labels       = map(bool)<br>    private_key  = string<br>    bastion_host = optional(string)<br>    bastion_port = optional(string)<br>    bastion_user = optional(string)<br>  }))</pre> | `[]` | no |
 
 ## Outputs
 
