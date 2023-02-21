@@ -116,3 +116,25 @@ hetzner-destroy:
 		-chdir=${EXAMPLES_DIR}/hetzner \
 		destroy
 .PHONY: hetzner-destroy
+
+scaleway-init:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/scaleway \
+		init \
+		-backend-config=organization="${TF_REMOTE_ORG}" \
+		-backend-config=token="${TF_REMOTE_TOKEN}"
+.PHONY: scaleway-init
+
+scaleway-apply:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/scaleway \
+		apply
+
+	PROVIDER=scaleway $(MAKE) save-kubeconfig cert-manager install-gitpod
+.PHONY: scaleway-apply
+
+scaleway-destroy:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/scaleway \
+		destroy
+.PHONY: scaleway-destroy
