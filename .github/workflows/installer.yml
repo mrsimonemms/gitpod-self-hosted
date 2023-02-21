@@ -107,7 +107,7 @@ jobs:
           hcloud server create \
             --name github-actions-$GITHUB_RUN_ID \
             --image ubuntu-20.04 \
-            --location nbg1 \
+            --location hel1 \
             --type cx41 \
             --ssh-key "GitHub Actions" \
             --user-data-from-file=./cloud-init/k3s_manager.yaml
