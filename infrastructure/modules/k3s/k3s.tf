@@ -4,7 +4,6 @@ resource "ssh_resource" "install_primary_manager" {
   private_key = local.primary_manager.private_key
   port        = 2244
 
-
   bastion_host = lookup(local.primary_manager, "bastion_host", null)
   bastion_port = lookup(local.primary_manager, "bastion_port", null)
   bastion_user = lookup(local.primary_manager, "bastion_user", null)
@@ -29,13 +28,14 @@ resource "ssh_sensitive_resource" "kubeconfig" {
     always_run = timestamp()
   }
 
-  host         = local.primary_manager.node.public_ip
-  user         = local.primary_manager.node.username
-  private_key  = local.primary_manager.private_key
-  bastion_host = local.primary_manager.bastion_host
-  bastion_port = local.primary_manager.bastion_port
-  bastion_user = local.primary_manager.bastion_user
-  port         = 2244
+  host        = local.primary_manager.node.public_ip
+  user        = local.primary_manager.node.username
+  private_key = local.primary_manager.private_key
+  port        = 2244
+
+  bastion_host = lookup(local.primary_manager, "bastion_host", null)
+  bastion_port = lookup(local.primary_manager, "bastion_port", null)
+  bastion_user = lookup(local.primary_manager, "bastion_user", null)
 
   commands = [
     "sudo sed \"s/127.0.0.1/${local.k3s_server_address_public}/g\" /etc/rancher/k3s/k3s.yaml"
