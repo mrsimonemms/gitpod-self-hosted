@@ -12,6 +12,8 @@ Fixes #
 
 Thanks for this pull request. Please complete the checklist to get the change accepted quicker
 
+- [ ] No merge commits please - use `git rebase upstream/main` instead
+
 ### Cloud provider modules only
 - [ ] This change requires testing on a new cloud provider
 - [ ] I am prepared to share my cloud provider credentials (this is required for the change to be accepted - see [reasoning](https://github.com/mrsimonemms/gitpod-self-hosted#roadmap))
