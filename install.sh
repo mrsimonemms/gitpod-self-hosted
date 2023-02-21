@@ -53,13 +53,14 @@ get_kube_command() {
   filepath="${3}"
 
   if [ $op == "apply" ]; then
-   if [ -n "$tofile" ] || [ $tofile = false ]; then
+   if [ $tofile = false ]; then
      echo "kubectl apply -f -"
    else
-     echo "kubectl apply --dry-run=client -o yaml -f - > $filepath"
+     #echo "kubectl apply --dry-run=client -o yaml -f - > $filepath"
+     echo "tee $filepath"
    fi
   elif [ $op = "replace" ]; then
-    if [ -n "$tofile" ] || [ $tofile = false ]; then
+    if [ $tofile = false ]; then
       echo "kubectl replace --force -f -"
     else
      echo "kubectl apply --dry-run=client -o yaml -f - > $filepath"
@@ -75,7 +76,7 @@ cert_manager() {
   cluster_issuer="${3}"
   install_deps="${4}"
   flux_stage=${5}
-  if [ -n "$flux_stage" ] || [ "$flux_stage" = false ]; then
+  if  [ "$flux_stage" = false ]; then
     helm upgrade \
       --atomic \
       --cleanup-on-fail \
@@ -117,7 +118,7 @@ cert_manager() {
     ".spec.dnsNames=[\"${domain_name}\", \"*.${domain_name}\", \"*.ws.${domain_name}\"]" \
     "$(get_file kubernetes/tls-certificate.yaml)" | eval $(get_kube_command "apply" flux_stage "flux/apps/base/gitpod/tls-certificate.yaml")
 
-  if [ -n "$flux_stage" ] || [ "$flux_stage" = false ]; then
+  if  [ "$flux_stage" = false ]; then
     echo "Waiting ${TLS_CERT_ISSUE_TIMEOUT} for Gitpod TLS certificate to be issued..."
     kubectl wait \
       --for=condition=ready \
@@ -202,7 +203,7 @@ install_gitpod() {
     rm -f tmp/ssh-key*
     ssh-keygen -t rsa -N "" -C "Gitpod SSH key" -f tmp/ssh-key
 
-    if [ -n "$flux_stage" ] || [ flux_stage = false ]; then
+    if  [ flux_stage = false ]; then
       kubectl create secret generic \
         "${SSH_HOST_KEY_SECRET}" \
         --from-file="host-key=./tmp/ssh-key" \
@@ -211,7 +212,7 @@ install_gitpod() {
       kubectl create secret generic \
         "${SSH_HOST_KEY_SECRET}" \
         --from-file="host-key=./tmp/ssh-key" \
-        -n "${NAMESPACE}" -o yaml --dry-run=flux/apps/base/gitpod/ssh-key-secret.yaml
+        -n "${NAMESPACE}" -o yaml --dry-run=client > flux/apps/base/gitpod/ssh-key-secret.yaml
     fi
   fi
 
@@ -245,7 +246,7 @@ install_gitpod() {
 
   stop_running_workspaces
 
-  if [ -n "$flux_stage" ] || [ flux_stage = false ]; then
+  if  [ flux_stage = false ]; then
     echo "Installing Gitpod with Helm with ${HELM_TIMEOUT} timeout"
     helm upgrade \
       --atomic="${CLEANUP_FAILED_UPGRADE}" \
