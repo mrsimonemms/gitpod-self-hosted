@@ -2,25 +2,25 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/cloudflare/cloudflare" {
-  version     = "3.34.0"
+  version     = "3.35.0"
   constraints = ">= 3.0.0, < 4.0.0"
   hashes = [
-    "h1:4jOI2ZUyp/EvIVE9rNvCMTqrIaG7j7XxUD1i43xD0Jg=",
-    "zh:03729b0fcf189e732aca54452a105d82fec839580cb5d0137317af9163e0e4dd",
-    "zh:121b16a779e9f2fe8c96e98f32514ee9228346fc240ce12c3fb440958b93d127",
-    "zh:14509f521845eedd57a8791d76958e50bea4928760a152cd853e43f2c81a329b",
-    "zh:273336ec2bc59ab90916706c074be27f3fe6ab42addc61a354a0ef5e10c2efa5",
-    "zh:54931c30f71666856c5d749698264c15196103667c87d961f3d293ff8a5c3237",
-    "zh:58a35eea3b9e1d2f39d7b5b1c6cf107b70eacdf5891017d6667902903db3bd94",
-    "zh:5ec958afe392a76a1fea262d9070df839c4d811fc6ffd613a37f8b939ab159ef",
-    "zh:7c24c0572aa9beee20a33cb18ac54d5088a09653e94664a9f74a9af2ae0e3554",
+    "h1:SFvdgX5bTGhOTMhywgjSOWlkET2el7STxdUSzxjz2pc=",
+    "zh:13aabc00fee823422831bcc870227650cc765fc4c9622074d24d6d62a4ac0e37",
+    "zh:1544405f0ea6b388dad7eb25c434427b2682417396da9186e1b33551e6b4adff",
+    "zh:5d58394cb8e71bd4bf6ef0135f1ca6a4ad2cec937f3731b224125eb34ee059f7",
+    "zh:648596ed545ed01ae757d5a0b37c20e8050cfb51d42e9a2c82fcc94d883ff11d",
+    "zh:68d75e14eef4f073faa975ed6baf4db7e0e1f2fc61a4e54fd95325df42793810",
     "zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f",
-    "zh:9248c43f795dbe54e07c6dbc2fb8e2f20aeac8f21ec91373d52b9975f285ba7e",
-    "zh:b09abd506601b7c3e0b3bfde0b8b9e1aed7f52b5ad629ef2865b8321852409c7",
-    "zh:e00032df4cd4aad12adf3b7955fca3d1baa8bff9436c775588417da171a4e1d9",
-    "zh:e4a8812770914d6ce9d1f8399d702e3fb0ecc4bfd6220ba015fcb3884b243c69",
-    "zh:f2ad0991ef0820b3fc5bd0a500be4dceffe0b5b2ac6c9c5fd17cbb350f2f1209",
-    "zh:fea3a9dfb1e752dc2864028049a4af05fabf7b62eb57fff26d139a424e3476fd",
+    "zh:9916cc626fef57428c4c60db7897b34068c65639b68482e94f62d97d773d64bc",
+    "zh:9c8c9f369eb30e7360a0ebd7918e4846ca4d5bca430b861fdbde7522a3146459",
+    "zh:a40e244688bbcb6f1a771e6ea89fb0b0b7bb53be3fab718abc66b3593e0f8133",
+    "zh:cc5a6191aa8713275550ff2b6adda6e6d56e4780c9cbe3d1da1dc23ea893bfff",
+    "zh:d1dd435780e8c7e79bff26b46a76df0e123971849355ad17877d1e24dc5953c3",
+    "zh:d751fc72f2833f2bdb897fa89de2bb5b6efbad1e648896642f0e6fe5cde789c8",
+    "zh:dfc4c90b3605ec1bb7cc7a9f1fb1b67235578bdd6b9be78e7b3516b55d0422db",
+    "zh:e6101a80fe24e2df3ab60152458ff1666a4a1befc87c62e459a219cdbb53e6df",
+    "zh:e9bcf26c44dd231f74703b6a6717470021a3ba7e1d7531dcf7287a6441300e27",
   ]
 }
 
@@ -86,7 +86,7 @@ provider "registry.terraform.io/hetznercloud/hcloud" {
 
 provider "registry.terraform.io/loafoe/ssh" {
   version     = "2.6.0"
-  constraints = ">= 2.3.0, < 3.0.0"
+  constraints = ">= 2.6.0, < 3.0.0"
   hashes = [
     "h1:80FIBNQBLj9p0j7EMQDWxzY6Fh0VODiflCww1/Wx6rk=",
     "zh:1285448b69bd388a4a59ed170f9c07c641207a7291057860557937807d02da95",

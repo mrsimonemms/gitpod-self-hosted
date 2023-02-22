@@ -28,7 +28,9 @@ jobs:
         dir:
           - infrastructure/modules/common
           - infrastructure/modules/k3s
+          - infrastructure/providers/azure
           - infrastructure/providers/hetzner
+          - infrastructure/providers/scaleway
     steps:
       - uses: actions/checkout@v3
 
