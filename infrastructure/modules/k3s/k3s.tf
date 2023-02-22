@@ -40,10 +40,11 @@ resource "ssh_sensitive_resource" "kubeconfig" {
   # Inspired by k3sup
   # @link https://github.com/alexellis/k3sup/blob/92c9c3a1ed17c6dc60327dc173dd9262894be76c/cmd/install.go#L564
   commands = [
-    "sudo sed -i \"s/127.0.0.1/${local.kubeconfig_address}/g\" ${local.k3s_kubeconfig}",
-    "sudo sed -i \"s/localhost/${local.kubeconfig_address}/g\" ${local.k3s_kubeconfig}",
-    "sudo sed -i \"s/default/${var.kubecontext}/g\" ${local.k3s_kubeconfig}",
-    "sudo cat ${local.k3s_kubeconfig}",
+    "sudo cp /etc/rancher/k3s/k3s.yaml /tmp/k3s.yaml",
+    "sudo sed -i \"s/127.0.0.1/${local.kubeconfig_address}/g\" /tmp/k3s.yaml",
+    "sudo sed -i \"s/localhost/${local.kubeconfig_address}/g\" /tmp/k3s.yaml",
+    "sudo sed -i \"s/default/${var.kubecontext}/g\" /tmp/k3s.yaml",
+    "sudo cat /tmp/k3s.yaml",
   ]
 }
 
