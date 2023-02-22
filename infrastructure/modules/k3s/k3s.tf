@@ -4,6 +4,10 @@ resource "ssh_resource" "install_primary_manager" {
   private_key = local.primary_manager.private_key
   port        = 2244
 
+  bastion_host = local.primary_manager.bastion_host
+  bastion_port = local.primary_manager.bastion_port
+  bastion_user = local.primary_manager.bastion_user
+
   commands = compact([
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
     "k3s-uninstall.sh || true",
@@ -33,6 +37,10 @@ resource "ssh_sensitive_resource" "kubeconfig" {
   private_key = local.primary_manager.private_key
   port        = 2244
 
+  bastion_host = local.primary_manager.bastion_host
+  bastion_port = local.primary_manager.bastion_port
+  bastion_user = local.primary_manager.bastion_user
+
   # Inspired by k3sup
   # @link https://github.com/alexellis/k3sup/blob/92c9c3a1ed17c6dc60327dc173dd9262894be76c/cmd/install.go#L564
   commands = [
@@ -54,6 +62,10 @@ resource "ssh_sensitive_resource" "k3s_token" {
   private_key = local.primary_manager.private_key
   port        = 2244
 
+  bastion_host = local.primary_manager.bastion_host
+  bastion_port = local.primary_manager.bastion_port
+  bastion_user = local.primary_manager.bastion_user
+
   commands = [
     "sudo cat /var/lib/rancher/k3s/server/node-token"
   ]
@@ -70,6 +82,10 @@ resource "ssh_resource" "install_additional_managers" {
   user        = local.additional_managers[count.index].node.username
   private_key = local.additional_managers[count.index].private_key
   port        = 2244
+
+  bastion_host = lookup(local.additional_managers[count.index], "bastion_host", null)
+  bastion_port = lookup(local.additional_managers[count.index], "bastion_port", null)
+  bastion_user = lookup(local.additional_managers[count.index], "bastion_user", null)
 
   commands = [
     # Uninstall k3s in case we've tainted the resource - this is allowed to fail
