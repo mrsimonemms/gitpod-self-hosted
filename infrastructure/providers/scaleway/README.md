@@ -45,6 +45,7 @@ Build Gitpod infrastructure in Scaleway
 |------|------|
 | [random_integer.label_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) | resource |
 | [scaleway_account_ssh_key.vm](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/account_ssh_key) | resource |
+| [scaleway_instance_security_group.network](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/instance_security_group) | resource |
 | [scaleway_lb.main](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/lb) | resource |
 | [scaleway_lb_backend.http-backend](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/lb_backend) | resource |
 | [scaleway_lb_backend.https-backend](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/lb_backend) | resource |
@@ -58,7 +59,7 @@ Build Gitpod infrastructure in Scaleway
 | [scaleway_vpc_public_gateway.pg01](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/vpc_public_gateway) | resource |
 | [scaleway_vpc_public_gateway_dhcp.dhcp01](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/vpc_public_gateway_dhcp) | resource |
 | [scaleway_vpc_public_gateway_ip.gw01](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/vpc_public_gateway_ip) | resource |
-| [scaleway_vpc_public_gateway_pat_rule.main](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/vpc_public_gateway_pat_rule) | resource |
+| [scaleway_vpc_public_gateway_pat_rule.kubernetes](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/vpc_public_gateway_pat_rule) | resource |
 | [time_sleep.managers](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 
 ## Inputs
