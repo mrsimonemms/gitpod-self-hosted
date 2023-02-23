@@ -1,5 +1,5 @@
 output "firewall_ports" {
-  value = local.firewall_ports
+  value = module.common.firewall_ports
 }
 
 output "k3s_token" {

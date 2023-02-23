@@ -6,3 +6,7 @@ terraform {
     }
   }
 }
+
+module "common" {
+  source = "../common"
+}

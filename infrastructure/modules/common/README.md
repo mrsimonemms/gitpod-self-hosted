@@ -27,6 +27,7 @@ No inputs.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_firewall_ports"></a> [firewall\_ports](#output\_firewall\_ports) | Firewall ports for k3s |
 | <a name="output_name_format"></a> [name\_format](#output\_name\_format) | Name format to use for regional variables |
 | <a name="output_name_format_global"></a> [name\_format\_global](#output\_name\_format\_global) | Name format to use for global variables |
 | <a name="output_node_labels"></a> [node\_labels](#output\_node\_labels) | Labels to apply to nodes |

@@ -1,3 +1,8 @@
+output "firewall_ports" {
+  description = "Firewall ports for k3s"
+  value       = local.firewall_ports
+}
+
 output "name_format" {
   description = "Name format to use for regional variables"
   value       = local.name_format

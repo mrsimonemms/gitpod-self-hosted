@@ -17,7 +17,9 @@ Install k3s
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_common"></a> [common](#module\_common) | ../common | n/a |
 
 ## Resources
 
