@@ -19,18 +19,28 @@ jobs:
 
       - uses: ludeeus/action-shellcheck@master
 
+  terraform_dirs:
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.dirs.outputs.dirs }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get terraform module folders
+        id: dirs
+        run: |
+          DIRS=$(jq -MncR '[inputs]' <<< $(ls -d infrastructure/*/*))
+          echo "dirs=$DIRS" >> $GITHUB_OUTPUT
+
   terraform:
     runs-on: ubuntu-latest
+    needs:
+      - terraform_dirs
     strategy:
       fail-fast: true
       matrix:
         # Only checks modules, not examples
-        dir:
-          - infrastructure/modules/common
-          - infrastructure/modules/k3s
-          - infrastructure/providers/azure
-          - infrastructure/providers/hetzner
-          - infrastructure/providers/scaleway
+        dir: ${{ fromJSON(needs.terraform_dirs.outputs.dirs) }}
     steps:
       - uses: actions/checkout@v3
 
