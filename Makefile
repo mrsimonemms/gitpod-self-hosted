@@ -95,6 +95,28 @@ azure-destroy:
 		destroy
 .PHONY: azure-destroy
 
+digitalocean-init:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/digitalocean \
+		init \
+		-backend-config=organization="${TF_REMOTE_ORG}" \
+		-backend-config=token="${TF_REMOTE_TOKEN}"
+.PHONY: digitalocean-init
+
+digitalocean-apply:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/digitalocean \
+		apply
+
+	PROVIDER=digitalocean $(MAKE) save-kubeconfig cert-manager install-gitpod
+.PHONY: digitalocean-apply
+
+digitalocean-destroy:
+	@terraform \
+		-chdir=${EXAMPLES_DIR}/digitalocean \
+		destroy
+.PHONY: digitalocean-destroy
+
 hetzner-init:
 	@terraform \
 		-chdir=${EXAMPLES_DIR}/hetzner \

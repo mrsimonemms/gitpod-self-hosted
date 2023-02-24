@@ -41,6 +41,18 @@ tasks:
       fi
 
       exit 0
+  - name: DigitalOcean
+    command: |
+      gp sync-await setup
+
+      if [ -n "${DIGITALOCEAN_TOKEN}" ]; then
+        make digitalocean-init
+
+        gp sync-done digitalocean-init
+      fi
+
+      exit 0
+
   - name: Hetzner
     command: |
       gp sync-await setup
