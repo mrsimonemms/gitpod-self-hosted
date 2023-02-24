@@ -34,8 +34,32 @@ locals {
         ]
       }
     },
-    // @todo(sje): Medium is designed for a few concurrent developers - highly-available manager, three Gitpod nodes, no autoscaling
-    medium : {},
+    # Medium is designed for a few concurrent developers - highly-available manager, three Gitpod nodes, no autoscaling
+    medium : {
+      load_balancer = "LB-S"
+      machines = {
+        // This manager won't run any Gitpod resources, just for Kubernetes management nodes
+        manager = {
+          count       = 3
+          labels      = {}
+          server_type = "PRO2-XXS"
+        },
+        nodes = [
+          {
+            auto_scale = false // @todo(sje): work out how to autoscale
+            count      = 3
+            labels = {
+              lookup(module.common.node_labels, "workload_meta")      = true
+              lookup(module.common.node_labels, "workload_ide")       = true
+              lookup(module.common.node_labels, "workspace_services") = true
+              lookup(module.common.node_labels, "workspace_regular")  = true
+              lookup(module.common.node_labels, "workspace_headless") = true
+            }
+            server_type = "PRO2-XS"
+          },
+        ]
+      }
+    },
     // @todo(sje): Large is designed for many concurrent developers - highly-available manager, autoscaling Gitpod nodes, multiple pools
     large : {},
   }
