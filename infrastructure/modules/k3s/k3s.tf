@@ -54,6 +54,10 @@ resource "ssh_sensitive_resource" "k3s_token" {
     ssh_resource.install_primary_manager
   ]
 
+  triggers = {
+    always_run = timestamp()
+  }
+
   host        = local.k3s_server_address_public
   user        = local.primary_manager.node.username
   private_key = local.primary_manager.private_key

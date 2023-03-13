@@ -38,4 +38,10 @@ resource "azurerm_linux_virtual_machine" "node" {
       var.azurerm_user_assigned_identity_id
     ]
   }
+
+  lifecycle {
+    ignore_changes = [
+      custom_data,
+    ]
+  }
 }
