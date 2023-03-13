@@ -15,6 +15,7 @@ else
 fi
 
 mkdir -p ./tmp
+mkdir -p flux/{apps/base/gitpod,infrastructure/configs,infrastructure/controllers}
 
 CLEANUP_FAILED_UPGRADE="${CLEANUP_FAILED_UPGRADE:-true}"
 DOCKER_PULL="${DOCKER_PULL:-always}"
@@ -46,6 +47,26 @@ catch() {
   exit "${1}"
 }
 
+get_kube_command() {
+  op="${1}"
+  tofile="${2}"
+  filepath="${3}"
+
+  if [ $op == "apply" ]; then
+   if [ $tofile = false ]; then
+     echo "kubectl apply -f -"
+   else
+     #echo "kubectl apply --dry-run=client -o yaml -f - > $filepath"
+     echo "tee $filepath"
+   fi
+  elif [ $op = "replace" ]; then
+    if [ $tofile = false ]; then
+      echo "kubectl replace --force -f -"
+    else
+     echo "kubectl apply --dry-run=client -o yaml -f - > $filepath"
+    fi
+  fi
+}
 cert_manager() {
   echo "Installing cert-manager"
   cm_namespace="cert-manager"
@@ -54,20 +75,25 @@ cert_manager() {
   secrets="${2}"
   cluster_issuer="${3}"
   install_deps="${4}"
-
-  helm upgrade \
-    --atomic \
-    --cleanup-on-fail \
-    --create-namespace \
-    --install \
-    --namespace "${cm_namespace}" \
-    --repo https://charts.jetstack.io \
-    --reset-values \
-    --set installCRDs=true \
-    --set 'extraArgs={--dns01-recursive-nameservers-only=true,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}' \
-    --version ^1.11.0 \
-    --wait \
-    cert-manager cert-manager
+  flux_stage=${5}
+  if  [ "$flux_stage" = false ]; then
+    helm upgrade \
+      --atomic \
+      --cleanup-on-fail \
+      --create-namespace \
+      --install \
+      --namespace "${cm_namespace}" \
+      --repo https://charts.jetstack.io \
+      --reset-values \
+      --set installCRDs=true \
+      --set 'extraArgs={--dns01-recursive-nameservers-only=true,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}' \
+      --version ^1.11.0 \
+      --wait \
+      cert-manager cert-manager
+  else
+    # Render cert manager template
+    echo "hello cert"
+  fi
 
   if [ -n "${install_deps}" ]; then
     echo "Executing cert-manager dependencies: ${install_deps}"
@@ -84,26 +110,29 @@ cert_manager() {
   echo "Creating ClusterIssuer"
 
   echo "${cluster_issuer}" > tmp/cluster_issuer.yaml
-  yq -P '. *= load("tmp/cluster_issuer.yaml")' "$(get_file kubernetes/cert-manager.yaml)" | kubectl apply -f -
+  yq -P '. *= load("tmp/cluster_issuer.yaml")' "$(get_file kubernetes/cert-manager.yaml)" | eval $(get_kube_command "apply" flux_stage "flux/infrastructure/configs/scaleway-issuer.yaml")
   rm -f tmp/cluster_issuer.yaml
 
   echo "Creating TLS certificate for ${domain_name}"
   yq e \
     ".spec.dnsNames=[\"${domain_name}\", \"*.${domain_name}\", \"*.ws.${domain_name}\"]" \
-    "$(get_file kubernetes/tls-certificate.yaml)" | kubectl apply -f -
+    "$(get_file kubernetes/tls-certificate.yaml)" | eval $(get_kube_command "apply" flux_stage "flux/apps/base/gitpod/tls-certificate.yaml")
 
-  echo "Waiting ${TLS_CERT_ISSUE_TIMEOUT} for Gitpod TLS certificate to be issued..."
-  kubectl wait \
-    --for=condition=ready \
-    -n gitpod \
-    --timeout="${TLS_CERT_ISSUE_TIMEOUT}" \
-    certificate \
-    https-certificates
+  if  [ "$flux_stage" = false ]; then
+    echo "Waiting ${TLS_CERT_ISSUE_TIMEOUT} for Gitpod TLS certificate to be issued..."
+    kubectl wait \
+      --for=condition=ready \
+      -n gitpod \
+      --timeout="${TLS_CERT_ISSUE_TIMEOUT}" \
+      certificate \
+      https-certificates
+  fi
 }
 
 create_kube_secrets() {
   secrets="${1}"
   target_namespace="${2:-$NAMESPACE}"
+  flux_stage=${3}
 
   for secretName in $(echo "${secrets}" | jq -r 'keys[]'); do
     secretList="$(echo "${secrets}" | jq --arg KEY "${secretName}" '.[$KEY]')"
@@ -121,8 +150,7 @@ create_kube_secrets() {
 
       create_cmd+=" --from-literal=${key}='${value}'"
     done
-
-    eval "${create_cmd}" | kubectl replace --force -f -
+    eval "${create_cmd}" | eval $(get_kube_command "replace" flux_stage "flux/apps/base/gitpod/secret${secretName}.yaml")
   done
 }
 
@@ -159,22 +187,33 @@ installer() {
 install_gitpod() {
   echo "Installing Gitpod"
 
-  chart_dir="tmp/chart"
-
   gitpod_config="${1}"
   gitpod_secrets="${2}"
+  flux_stage=${3}
+  if [ flux_stage = false ]; then
+    chart_dir="tmp/chart"
+  else
+    chart_dir="flux/chart"
+  fi
 
-  create_kube_secrets "${gitpod_secrets}"
+  create_kube_secrets "${gitpod_secrets}" "${NAMESPACE}" ${flux_stage}
 
   # Generate SSH private key
   if ! kubectl get secret -n "${NAMESPACE}" "${SSH_HOST_KEY_SECRET}"; then
     rm -f tmp/ssh-key*
     ssh-keygen -t rsa -N "" -C "Gitpod SSH key" -f tmp/ssh-key
 
-    kubectl create secret generic \
-      "${SSH_HOST_KEY_SECRET}" \
-      --from-file="host-key=./tmp/ssh-key" \
-      -n "${NAMESPACE}"
+    if  [ flux_stage = false ]; then
+      kubectl create secret generic \
+        "${SSH_HOST_KEY_SECRET}" \
+        --from-file="host-key=./tmp/ssh-key" \
+        -n "${NAMESPACE}"
+    else
+      kubectl create secret generic \
+        "${SSH_HOST_KEY_SECRET}" \
+        --from-file="host-key=./tmp/ssh-key" \
+        -n "${NAMESPACE}" -o yaml --dry-run=client > flux/apps/base/gitpod/ssh-key-secret.yaml
+    fi
   fi
 
   echo "${gitpod_config}" > tmp/generated_config.yaml
@@ -207,35 +246,37 @@ install_gitpod() {
 
   stop_running_workspaces
 
-  echo "Installing Gitpod with Helm with ${HELM_TIMEOUT} timeout"
-  helm upgrade \
-    --atomic="${CLEANUP_FAILED_UPGRADE}" \
-    --cleanup-on-fail="${CLEANUP_FAILED_UPGRADE}" \
-    --create-namespace \
-    --install \
-    --namespace="${NAMESPACE}" \
-    --reset-values \
-    --timeout "${HELM_TIMEOUT}" \
-    --wait \
-    gitpod \
-    tmp/chart
-
-  echo "Gitpod available on https://$(yq '.domain' tmp/gitpod.config.yaml)"
-
-  if [ "${MONITORING_INSTALL}" = "true" ]; then
-    echo "Installing monitoring"
+  if  [ flux_stage = false ]; then
+    echo "Installing Gitpod with Helm with ${HELM_TIMEOUT} timeout"
     helm upgrade \
-      --atomic \
-      --cleanup-on-fail \
+      --atomic="${CLEANUP_FAILED_UPGRADE}" \
+      --cleanup-on-fail="${CLEANUP_FAILED_UPGRADE}" \
       --create-namespace \
       --install \
-      --namespace="${MONITORING_NAMESPACE}" \
-      --repo=https://helm.simonemms.com \
+      --namespace="${NAMESPACE}" \
       --reset-values \
-      --set gitpodNamespace="${NAMESPACE}" \
+      --timeout "${HELM_TIMEOUT}" \
       --wait \
-      monitoring \
-      gitpod-monitoring
+      gitpod \
+      tmp/chart
+
+    echo "Gitpod available on https://$(yq '.domain' tmp/gitpod.config.yaml)"
+
+    if [ "${MONITORING_INSTALL}" = "true" ]; then
+      echo "Installing monitoring"
+      helm upgrade \
+        --atomic \
+        --cleanup-on-fail \
+        --create-namespace \
+        --install \
+        --namespace="${MONITORING_NAMESPACE}" \
+        --repo=https://helm.simonemms.com \
+        --reset-values \
+        --set gitpodNamespace="${NAMESPACE}" \
+        --wait \
+        monitoring \
+        gitpod-monitoring
+    fi
   fi
 }
 
@@ -274,13 +315,12 @@ stop_running_workspaces() {
 ############
 # Commands #
 ############
-
 case "${cmd}" in
   cert_manager )
-    cert_manager "${DOMAIN_NAME:-$2}" "$(echo "${SECRETS:-$3}" | base64 -d)" "$(echo "${CLUSTER_ISSUER:-$4}" | base64 -d)" "${WEBHOOKS_SCRIPT:-$5}"
+    cert_manager "${DOMAIN_NAME:-$2}" "$(echo "${SECRETS:-$3}" | base64 -d)" "$(echo "${CLUSTER_ISSUER:-$4}" | base64 -d)" "${WEBHOOKS_SCRIPT:-$5}" ${FLUX_STAGE:-$6}
     ;;
   install_gitpod )
-    install_gitpod "$(echo "${GITPOD_CONFIG:-$2}" | base64 -d)" "$(echo "${GITPOD_SECRETS:-$3}" | base64 -d)"
+    install_gitpod "$(echo "${GITPOD_CONFIG:-$2}" | base64 -d)" "$(echo "${GITPOD_SECRETS:-$3}" | base64 -d)" ${FLUX_STAGE:-$4}
     ;;
   stop_running_workspaces )
     stop_running_workspaces

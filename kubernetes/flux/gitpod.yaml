@@ -1,0 +1,39 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: gitpod
+  labels:
+    name: gitpod
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: podinfo
+  namespace: flux-system
+spec:
+  secretRef:
+    name: bearer-token-auth
+  interval: 1m
+  url: https://gitlab.com/spiculedata/fluxcd.git
+  ref:
+    branch: main
+  ignore: |
+    # exclude all
+    /*
+    # include charts directory
+    !/charts/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: gitpod
+  namespace: gitpod
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: charts/gitpod
+      sourceRef:
+        kind: GitRepository
+        name: podinfo
+        namespace: flux-system
