@@ -7,6 +7,8 @@ on:
   # Nightly build
   schedule:
     - cron: "0 1 * * *"
+  # Trigger
+  workflow_dispatch: {}
 env:
   DOMAIN: test.gitpod-self-hosted.dev
   HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
@@ -52,7 +54,7 @@ jobs:
         run: |
           if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ]; then
             INSTALLER_VERSION="${{ steps.tagged_version.outputs.version }}"
-          elif [ "${{ github.event_name == 'schedule' }}" = true ]; then
+          else
             chrome --version
             cd ./werft-scraper
             npm ci
