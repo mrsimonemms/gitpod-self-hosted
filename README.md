@@ -1,5 +1,27 @@
 # Gitpod Self-Hosted Instructions
 
+> Since Gitpod [enabled GitHub Actions by default](https://github.com/gitpod-io/gitpod/pull/16225)
+> it appears that the container images are no longer published to a publicly
+> accessible registry.
+>
+> **This means that the dream of maintaining Gitpod self-hosted is over**. I still
+> really hope that this decision is reversed, but I can't see it ever happening
+> now. If you do want to maintain a self-hosted development environment, there
+> are some strong projects in this space - in alphabetical order, some to investigate
+> are:
+>
+> * [Coder](https://coder.com)
+> * [Hocus](https://github.com/hocus-dev/hocus)
+>
+> Thanks to everyone who helped with this project, especially [Tom Barber](https://github.com/buggtb).
+> This is a very sad day indeed.
+>
+> Simon Emms, April 2023
+>
+> ![A sad day](https://media.giphy.com/media/2WxWfiavndgcM/giphy.gif)
+
+---
+
 Resources for managing your own [Gitpod](https://www.gitpod.io) installation
 
 <!-- toc -->
