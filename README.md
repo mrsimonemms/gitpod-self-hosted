@@ -137,6 +137,7 @@ installation for international development teams.
 
 | Provider | Supported Sizes | Notes |
 | --- | --- | --- |
+| [DigitalOcean](https://m.do.co/c/1a9f2c34bfb4) | small | |
 | [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p) | small, medium | |
 | [Microsoft Azure](https://https://azure.microsoft.com) | small | <ul><li>Requires 2 x 4CPU, 16GB VMs - this is above the free trial quota so will need a paid Azure account</li><li>Azure Storage is not S3-compatible, [so does not work with Gitpod storage](https://github.com/gitpod-io/gitpod/pull/16081)</li><li>Further work will require access to a paid Azure account</li></ul> |
 | [Scaleway](https://www.scaleway.com) | small | |
@@ -486,7 +487,6 @@ I would like to see support for:
 
 * Amazon Web Services
 * Civo Cloud
-* DigitalOcean
 * Google Cloud Platform
 * Scaleway
 
@@ -512,4 +512,5 @@ I'm happy to discuss options for commercial support contracts. Please
 Using these links will help support the project and provide you with additional
 credits for the cloud provider.
 
+* [DigitalOcean](https://m.do.co/c/1a9f2c34bfb4)
 * [Hetzner](https://hetzner.cloud/?ref=UWVUhEZNkm6p)
