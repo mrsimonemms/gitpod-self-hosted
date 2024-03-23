@@ -25,7 +25,7 @@ variable "size" {
   default     = "small"
   validation {
     error_message = "Value must be small, medium or large"
-    condition     = contains(["small"], var.size) // @todo(sje): support large
+    condition     = contains(["small", "medium"], var.size) // @todo(sje): support large
   }
 }
 
